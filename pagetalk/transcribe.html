@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>PageTalk - 文件转录</title>
+  <link rel="stylesheet" href="transcribe.css">
+</head>
+<body>
+  <div class="voiceui-panel-main">
+    <h2>文件转录</h2>
+    <p>选择录音或上传支持的音频/视频文件进行识别。</p>
+
+    <!-- Tabs -->
+    <div class="voiceui-tabs" role="tablist" aria-label="Transcription source">
+      <button class="voiceui-tab-btn active" data-tab="record" role="tab" aria-controls="record-panel" aria-selected="true">录音</button>
+      <button class="voiceui-tab-btn" data-tab="upload" role="tab" aria-controls="upload-panel" aria-selected="false">文件上传</button>
+    </div>
+    
+    <!-- Transcribe Area -->
+    <div id="transcribe-area" data-state="idle">
+      <!-- Record Panel -->
+      <div class="voiceui-tab-panel active" id="record-panel" role="tabpanel">
+        <div class="voiceui-recorder-ui">
+          <div class="voiceui-recorder-controls">
+            <div class="voiceui-recorder-timer">00:00</div>
+            <button class="voiceui-recorder-btn" id="record-btn" title="单击或按住空格键开始/停止录音">
+              <span class="idle-content">
+                <div class="btn-text-stack">
+                  <span class="btn-text-main">开始</span>
+                  <span class="btn-text-sub">SPACE</span>
+                </div>
+              </span>
+              <span class="recording-content">
+                <span class="btn-text-main">停止录音</span>
+              </span>
+            </button>
+          </div>
+          <div class="voiceui-recorder-viz">
+            <canvas id="recorder-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+      <!-- Upload Panel -->
+      <div class="voiceui-tab-panel" id="upload-panel" role="tabpanel">
+        <div class="voiceui-panel-dropzone">
+          <div class="voiceui-panel-dropzone-content" id="idle-content">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span>拖放文件至此或点击选择</span>
+            <small>支持格式: aac, mp3, mp4, wav 等，大小不超过 10MB</small>
+            <input type="file" id="file-input" style="display: none;" />
+          </div>
+          <div class="voiceui-panel-dropzone-content" id="loading-content">
+            <div class="voiceui-spinner"></div>
+            <span>正在识别...</span>
+          </div>
+          <div class="voiceui-panel-dropzone-content" id="error-content">
+            <svg class="icon error-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <span class="voiceui-panel-error-message"></span>
+            <button class="voiceui-panel-action-btn" id="retry-btn">重试</button>
+          </div>
+        </div>
+      </div>
+      <div class="voiceui-panel-result-view">
+        <textarea class="voiceui-panel-result-text" id="result-text"></textarea>
+        <div class="voiceui-panel-result-actions">
+          <button class="voiceui-panel-action-btn secondary" id="transcribe-another-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            <span>再转录一个</span>
+          </button>
+          <button class="voiceui-panel-action-btn primary" id="copy-btn">
+            <svg class="icon-copy" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <svg class="icon-check" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span class="copy-text">复制文本</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <details class="voiceui-settings-details">
+      <summary class="voiceui-settings-summary">
+        <span>设置</span>
+        <svg class="chevron-icon" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+      </summary>
+      <div class="voiceui-settings-content">
+        <div class="voiceui-row"><label for="voiceui-provider">API 服务</label><select id="voiceui-provider">
+            <option value="free">Free</option>
+            <option value="dashscope">阿里云百炼</option>
+        </select></div>
+        <div class="voiceui-row" id="api-key-row"><label for="voiceui-apikey">阿里云百炼 Key</label><input type="password" id="voiceui-apikey" placeholder="sk-..." /></div>
+        <div class="voiceui-row"><label for="voiceui-lang">语言</label><select id="voiceui-lang">
+            <option value="auto">🌐 自动检测</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="ko">🇰🇷 한국어</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="pt">🇵🇹 Português</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="es">🇪🇸 Español</option>
+        </select></div>
+        <div class="voiceui-row"><label for="voiceui-itn" title="启用后，会将语音识别结果中的数字、日期、度量单位等格式化为书面语，例如将“一百块”转换为“100元”。">逆向文本标准化</label><input type="checkbox" id="voiceui-itn" /></div>
+        <div class="voiceui-row"><label for="voiceui-ctx">上下文</label><input type="text" id="voiceui-ctx" placeholder="专业词汇可提升识别率" /></div>
+      </div>
+    </details>
+
+    <!-- Footer -->
+    <div class="voiceui-footer">
+        <a href="https://github.com/yeahhe365/PageTalk" target="_blank" rel="noopener noreferrer" class="voiceui-github-link" title="在 GitHub 上查看项目">
+          <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14" aria-hidden="true"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.34c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.22.82 1.22.82.71 1.21 1.87.86 2.33.66.07-.51.28-.86.51-1.06-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"></path></svg>
+          <span>GitHub</span>
+        </a>
+    </div>
+
+  </div>
+  <div id="toast-container"></div>
+  <script src="transcribe.js"></script>
+</body>
+</html>

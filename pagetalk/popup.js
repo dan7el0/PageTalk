@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const providerSelect = document.getElementById('voiceui-provider');
   const apiKeyInput = document.getElementById('voiceui-apikey');
   const apiKeyRow = apiKeyInput.closest('.voiceui-row');
+  const apiKeyLinksRow = document.getElementById('voiceui-apikey-links-row');
   const langSelect = document.getElementById('voiceui-lang');
   const micSelect = document.getElementById('voiceui-mic');
   const itnCheckbox = document.getElementById('voiceui-itn');
@@ -38,69 +39,80 @@ document.addEventListener('DOMContentLoaded', () => {
   function toggleApiKeyVisibility() {
     if (providerSelect.value === 'free') {
       apiKeyRow.style.display = 'none';
+      apiKeyLinksRow.style.display = 'none';
     } else {
       apiKeyRow.style.display = 'flex';
+      apiKeyLinksRow.style.display = 'flex';
     }
   }
 
-  function listMicrophones() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-      micSelect.innerHTML = '<option value="error" disabled>不支持设备选择</option>';
-      return;
-    }
+  async function listMicrophones() {
+    const openOptionsPage = () => chrome.runtime.openOptionsPage();
 
-    // Temporarily request stream to get permission and device labels
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => {
-        // We don't need the stream, just the permission. Stop tracks immediately.
-        stream.getTracks().forEach(track => track.stop());
+    const guideToOptions = (message) => {
+      micSelect.innerHTML = `<option value="error" disabled>${message}</option>`;
+      micSelect.removeEventListener('click', openOptionsPage);
+      micSelect.addEventListener('click', openOptionsPage, { once: true });
+    };
 
-        return navigator.mediaDevices.enumerateDevices();
-      })
-      .then(devices => {
-        const audioInputDevices = devices.filter(device => device.kind === 'audioinput');
-        const currentValue = micSelect.value;
-        micSelect.innerHTML = '<option value="default">默认设备</option>';
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        micSelect.innerHTML = '<option value="error" disabled>不支持设备选择</option>';
+        return;
+      }
+      
+      const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
 
-        audioInputDevices.forEach(device => {
-          const option = document.createElement('option');
-          option.value = device.deviceId;
-          option.textContent = device.label || `麦克风 ${micSelect.options.length}`;
-          micSelect.appendChild(option);
-        });
+      if (permissionStatus.state !== 'granted') {
+        guideToOptions('需要权限(点击授权)');
+        return;
+      }
 
-        if ([...micSelect.options].some(o => o.value === currentValue)) {
-          micSelect.value = currentValue;
-        } else {
-          micSelect.value = 'default';
-        }
-      })
-      .catch(err => {
-        console.error("Error listing microphones:", err);
-        let errorMsg = '无法获取麦克风';
-        if (err instanceof DOMException) {
-          switch (err.name) {
-            case 'NotAllowedError':
-              errorMsg = '需要麦克风权限';
-              break;
-            case 'NotFoundError':
-              errorMsg = '未找到麦克风设备';
-              break;
-            case 'NotReadableError':
-              errorMsg = '麦克风硬件错误';
-              break;
-            case 'AbortError':
-              errorMsg = '请求被中止';
-              break;
-            case 'SecurityError':
-              errorMsg = '安全设置阻止了麦克风';
-              break;
-            default:
-              errorMsg = `错误: ${err.name}`;
-          }
-        }
-        micSelect.innerHTML = `<option value="error" disabled>${errorMsg}</option>`;
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputDevices = devices.filter(d => d.kind === 'audioinput');
+
+      if (audioInputDevices.length === 0) {
+        micSelect.innerHTML = '<option value="error" disabled>未找到麦克风</option>';
+        return;
+      }
+      
+      if (!audioInputDevices.some(d => d.label)) {
+        guideToOptions('请在选项页刷新设备');
+        return;
+      }
+
+      const currentValue = micSelect.value;
+      micSelect.innerHTML = '<option value="default">默认设备</option>';
+
+      audioInputDevices.forEach(device => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.textContent = device.label || `麦克风 ${micSelect.options.length}`;
+        micSelect.appendChild(option);
       });
+
+      if ([...micSelect.options].some(o => o.value === currentValue)) {
+        micSelect.value = currentValue;
+      } else {
+        micSelect.value = 'default';
+      }
+    } catch (err) {
+      console.error('Error listing microphones:', err.name, err.message);
+      const errorMap = {
+        NotAllowedError: '需要麦克风权限',
+        NotFoundError: '未找到麦克风设备',
+        NotReadableError: '麦克风硬件错误',
+        AbortError: '请求被中止',
+        SecurityError: '安全设置阻止了麦克风',
+      };
+      const errorMessage = errorMap[err.name] || `错误: ${err.name || '未知错误'}`;
+      
+      if (['NotAllowedError', 'SecurityError'].includes(err.name)) {
+        guideToOptions('需要权限(点击授权)');
+      } else {
+        micSelect.innerHTML = `<option value="error" disabled>${errorMessage}</option>`;
+      }
+    }
   }
 
   async function loadConfig() {
@@ -212,14 +224,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  loadConfig();
-  listMicrophones();
+  loadConfig().then(() => {
+    listMicrophones();
+  });
   
   [providerSelect, apiKeyInput, langSelect, micSelect, itnCheckbox, autoCopyCheckbox, ctxInput, clickSelect, scaleSelect, hotkeyInput, cancelHotkeyInput].forEach(input => {
     input.addEventListener('change', saveConfig);
   });
 
   providerSelect.addEventListener('change', toggleApiKeyVisibility);
+  navigator.mediaDevices?.addEventListener?.('devicechange', listMicrophones);
 
   setupHotkeyInput(hotkeyInput);
   setupHotkeyInput(cancelHotkeyInput);

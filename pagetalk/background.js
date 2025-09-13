@@ -43,5 +43,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // Return true to indicate you want to send a response asynchronously
     return true;
+  } else if (request.type === 'openTranscriptionPage') {
+    chrome.tabs.create({ url: 'transcribe.html' });
   }
 });

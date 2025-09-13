@@ -1,5 +1,4 @@
 
-
 (async () => {
   'use strict';
 
@@ -43,18 +42,49 @@
   initializeStyles(cfg.uiScale);
   const ui = createUI();
   createResultOverlay();
-  createTranscriptionPanel();
+
+  // New position update logic
+  const throttledUpdate = throttle(updateUIPosition, 100);
+  document.addEventListener('focusin', updateUIPosition, true);
+  // Use a timeout on focusout to allow the next element to receive focus before deciding to hide.
+  document.addEventListener('focusout', () => setTimeout(updateUIPosition, 0), true);
+  window.addEventListener('scroll', throttledUpdate, { capture: true, passive: true });
+  window.addEventListener('resize', throttledUpdate, { capture: true, passive: true });
+  
+  // Initial check in case a field is already focused on page load
+  setTimeout(updateUIPosition, 100);
 
   // Wire up events
-  ui.btn.addEventListener('click', () => {
-    if (ui.wrap.dataset.dragged === 'true') return;
-    if (!state.clickToToggle) return;
-    toggleRecording();
+  let longPressTimer;
+  let isLongPress = false;
+  const LONG_PRESS_DURATION = 500; // ms
+
+  ui.btn.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // Only for left-click
+      if (ui.wrap.dataset.dragged === 'true' || !state.clickToToggle) return;
+
+      isLongPress = false; // Reset on new press
+      longPressTimer = setTimeout(() => {
+          isLongPress = true;
+          chrome.runtime.sendMessage({ type: 'openTranscriptionPage' });
+      }, LONG_PRESS_DURATION);
   });
-  ui.btn.addEventListener('dblclick', () => {
-    if (ui.wrap.dataset.dragged === 'true') return;
-    showTranscriptionPanel();
+
+  ui.btn.addEventListener('mouseup', (e) => {
+      if (e.button !== 0) return; // Only for left-click
+      clearTimeout(longPressTimer);
+
+      if (!isLongPress) {
+          if (ui.wrap.dataset.dragged === 'true' || !state.clickToToggle) return;
+          toggleRecording();
+      }
   });
+
+  // Cancel long press if mouse leaves the button before timeout
+  ui.btn.addEventListener('mouseleave', () => {
+      clearTimeout(longPressTimer);
+  });
+  
   ui.cancelBtn.addEventListener('click', cancelRecording);
 
   // Apply initial config
@@ -65,7 +95,10 @@
     if (matchesHotkey(e, cfg.hotkey)) {
       e.preventDefault();
       e.stopPropagation();
-      toggleRecording();
+      // Ensure there's a place to type or that recording can happen without an input
+      if (getActiveEditable() || isRecording) {
+        toggleRecording();
+      }
     } else if (isRecording && matchesHotkey(e, cfg.cancelHotkey)) {
       e.preventDefault();
       e.stopPropagation();

@@ -37,11 +37,30 @@ h3 {
   flex: 1;
   font-size: 13px;
   box-sizing: border-box;
+  min-width: 0;
 }
 .voiceui-panel input[type="checkbox"] {
   flex: 0;
   width: 16px;
   height: 16px;
+}
+.voiceui-links-row {
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+.voiceui-links {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+}
+.voiceui-links a {
+  color: #888;
+  font-size: 11px;
+  text-decoration: none;
+}
+.voiceui-links a:hover {
+  color: #eee;
+  text-decoration: underline;
 }
 .voiceui-actions {
   display: flex;
