@@ -77,7 +77,28 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(err => {
         console.error("Error listing microphones:", err);
-        const errorMsg = err.name === 'NotAllowedError' ? '需要麦克风权限' : '无法获取麦克风';
+        let errorMsg = '无法获取麦克风';
+        if (err instanceof DOMException) {
+          switch (err.name) {
+            case 'NotAllowedError':
+              errorMsg = '需要麦克风权限';
+              break;
+            case 'NotFoundError':
+              errorMsg = '未找到麦克风设备';
+              break;
+            case 'NotReadableError':
+              errorMsg = '麦克风硬件错误';
+              break;
+            case 'AbortError':
+              errorMsg = '请求被中止';
+              break;
+            case 'SecurityError':
+              errorMsg = '安全设置阻止了麦克风';
+              break;
+            default:
+              errorMsg = `错误: ${err.name}`;
+          }
+        }
         micSelect.innerHTML = `<option value="error" disabled>${errorMsg}</option>`;
       });
   }

@@ -103,7 +103,7 @@ function createUI() {
   const cancelBtn = document.createElement('div');
   cancelBtn.className = 'voiceui-cancel-btn';
   cancelBtn.title = '取消录音';
-  cancelBtn.innerHTML = `<svg class="voiceui-icon" style="width: 60%; height: 60%;" viewBox="0 0 24 24" fill="currentColor"><path d="m12 13.4 5.6 5.6q.275.275.7.275.425 0 .7-.7.275-.275.275-.7 0-.425-.7-.7L13.4 12l5.6-5.6q.275-.275.275-.7 0-.425-.7-.7-.275-.275-.7-.275-.425 0-.7.7L12 10.6 6.4 5q-.275-.275-.7-.275-.425 0-.7.7-.275.275-.275.7 0 .425.7.7L10.6 12l-5.6 5.6q-.275.275-.275.7 0 .425.7.7.275.275.7.275.425 0 .7-.7Z"/></svg>`;
+  cancelBtn.innerHTML = `<svg class="voiceui-icon" style="width: 60%; height: 60%;" viewBox="0 0 24 24" fill="currentColor"><path d="m12 13.4 5.6 5.6q.275.275.7.275.425 0 .7-.7.275-.275.275-.7 0-.425-.7-.7L13.4 12l5.6-5.6q.275-.275.275-.7 0-.425-.7-.7-.275-.275-.7-.275-.425 0-.7.7L12 10.6 6.4 5q-.275-.275-.7-.275-.425 0-.7.7-.275.275.275-.7 0 .425.7.7L10.6 12l-5.6 5.6q-.275.275-.275.7 0 .425.7.7.275.275.7.275.425 0 .7-.7Z"/></svg>`;
 
   const btn = document.createElement('div');
   btn.className = 'voiceui-btn';
@@ -419,10 +419,10 @@ function updateUIAfterConfigChange(newConfig) {
     if (ui.wrap) {
         if (newConfig.clickToToggle) {
             ui.wrap.style.display = '';
-            ui.tip.textContent = `快捷键：${newConfig.hotkey}（单击开始/停止）`;
+            ui.tip.textContent = '单击录音，双击转录文件';
         } else {
             ui.wrap.style.display = 'none';
-            ui.tip.textContent = `快捷键：${newConfig.hotkey}`;
+            ui.tip.textContent = ''; // Tooltip is hidden with button anyway
         }
     }
     
