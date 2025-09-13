@@ -5,6 +5,9 @@ let pcmData = [];
 let currentSampleRate = 44100;
 let isRecording = false;
 
+const MAX_RECORDING_SECONDS = 180; // 3 minutes
+let recordingTimerInterval = null;
+
 async function startRecording() {
   if (isRecording) return;
 
@@ -83,8 +86,35 @@ async function startRecording() {
     isRecording = true;
     ui.wrap.classList.add('recording');
     ui.btn.classList.add('recording');
-    ui.badge.textContent = 'REC';
+
+    // Timer logic
+    let startTime = Date.now();
+    const maxMinutes = Math.floor(MAX_RECORDING_SECONDS / 60);
+    
+    const updateTimer = () => {
+        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        if (elapsedSeconds >= MAX_RECORDING_SECONDS) {
+            toast(`已达到最长录音时间 (${maxMinutes}分钟)`);
+            stopRecording(); // This will clear the interval
+            return;
+        }
+        const minutes = Math.floor(elapsedSeconds / 60);
+        const seconds = elapsedSeconds % 60;
+        if (ui.badge) {
+          ui.badge.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    };
+    
+    if (recordingTimerInterval) {
+        clearInterval(recordingTimerInterval);
+    }
+    updateTimer(); // Set to 00:00 immediately
+    recordingTimerInterval = setInterval(updateTimer, 1000);
+
     ui.badge.style.background = '#ef4444';
+    if (ui.tip) {
+      ui.tip.textContent = `录音中... (最长 ${maxMinutes} 分钟)`;
+    }
     toast('开始录音…');
   } catch (err) {
     console.error(err);
@@ -146,18 +176,78 @@ function getLanguageAbbreviation(lang) {
   return langMap[lang.toLowerCase()] || lang;
 }
 
+async function resample(audioBuffer, targetSampleRate, playbackRate = 1) {
+  const duration = audioBuffer.duration / playbackRate;
+  const offlineContext = new OfflineAudioContext(
+    1, // mono
+    Math.ceil(duration * targetSampleRate),
+    targetSampleRate
+  );
+  const bufferSource = offlineContext.createBufferSource();
+  bufferSource.buffer = audioBuffer;
+  bufferSource.playbackRate.value = playbackRate;
+  bufferSource.connect(offlineContext.destination);
+  bufferSource.start(0);
+  return await offlineContext.startRendering();
+}
+
 async function stopRecording() {
   if (!isRecording) return;
+
+  if (recordingTimerInterval) {
+    clearInterval(recordingTimerInterval);
+    recordingTimerInterval = null;
+  }
+  if (ui.tip) {
+    ui.tip.textContent = '单击录音，长按打开转录页面';
+  }
 
   isRecording = false;
   ui.wrap.classList.remove('recording');
   ui.btn.classList.remove('recording');
   ui.badge.textContent = '…';
   ui.badge.style.background = '#22c55e';
+  
+  // Combine PCM data chunks
+  const totalLength = pcmData.reduce((len, arr) => len + arr.length, 0);
+  
+  if (totalLength === 0) {
+    cleanupAudio();
+    toast('录音时间太短');
+    return;
+  }
 
+  const combinedPcm = new Float32Array(totalLength);
+  let offset = 0;
+  for (const chunk of pcmData) {
+    combinedPcm.set(chunk, offset);
+    offset += chunk.length;
+  }
+  
+  const TARGET_SAMPLE_RATE = 16000;
+  let wavBlob;
+
+  try {
+    if (currentSampleRate === TARGET_SAMPLE_RATE && state.transcribeSpeed === 1) {
+      wavBlob = encodeWAV([combinedPcm], currentSampleRate);
+    } else {
+      // Create buffer with original sample rate. audioContext is still open here.
+      const originalBuffer = audioContext.createBuffer(1, combinedPcm.length, currentSampleRate);
+      originalBuffer.copyToChannel(combinedPcm, 0);
+
+      const resampledBuffer = await resample(originalBuffer, TARGET_SAMPLE_RATE, state.transcribeSpeed);
+      const resampledPcm = resampledBuffer.getChannelData(0);
+      wavBlob = encodeWAV([resampledPcm], TARGET_SAMPLE_RATE);
+    }
+  } catch (err) {
+    console.error('Error processing audio:', err);
+    toast('音频处理失败: ' + (err.message || err));
+    cleanupAudio();
+    return;
+  }
+
+  // Now we can cleanup audio resources
   cleanupAudioResources();
-
-  const wavBlob = encodeWAV(pcmData, currentSampleRate);
   pcmData = [];
   setButtonLevel(0);
   
@@ -171,6 +261,11 @@ async function stopRecording() {
     } else {
         [text, lang] = await callDashScopeASRAPI(wavBlob, state);
     }
+
+    if (state.removeTrailingPeriod && text && text.endsWith('。')) {
+      text = text.slice(0, -1);
+    }
+    
     const langAbbr = getLanguageAbbreviation(lang);
     ui.badge.textContent = langAbbr || 'OK';
     ui.badge.style.background = '#22c55e';
@@ -218,6 +313,10 @@ function cleanupAudioResources() {
 }
 
 function cleanupAudio() {
+  if (recordingTimerInterval) {
+    clearInterval(recordingTimerInterval);
+    recordingTimerInterval = null;
+  }
   isRecording = false;
   pcmData = [];
   cleanupAudioResources();
@@ -226,6 +325,9 @@ function cleanupAudio() {
   ui.btn.classList.remove('recording');
   ui.badge.textContent = '…';
   ui.badge.style.background = '#22c55e';
+  if (ui.tip) {
+    ui.tip.textContent = '单击录音，长按打开转录页面';
+  }
 }
 
 function encodeWAV(chunks, sampleRate) {

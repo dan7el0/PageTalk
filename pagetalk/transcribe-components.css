@@ -1,0 +1,287 @@
+/* Settings */
+.voiceui-settings-details { border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 8px; }
+.voiceui-settings-summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-color);
+  padding: 8px 4px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+.voiceui-settings-summary::-webkit-details-marker { display: none; }
+.voiceui-settings-summary:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+.voiceui-settings-summary .chevron-icon { color: var(--text-color-secondary); transition: transform 0.2s; }
+.voiceui-settings-details[open] > .voiceui-settings-summary .chevron-icon { transform: rotate(180deg); }
+.voiceui-settings-content {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.voiceui-row { display: flex; align-items: center; gap: 12px; }
+.voiceui-row:has(.switch) {
+  justify-content: space-between;
+}
+.voiceui-settings-details label:not(.switch) { font-size: 13px; opacity: .9; flex-basis: 100px; flex-shrink: 0; color: var(--text-color-secondary); }
+.voiceui-settings-details select, .voiceui-settings-details input[type="text"], .voiceui-settings-details input[type="password"], .voiceui-settings-details input[type="number"] {
+  background: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 10px;
+  flex: 1;
+  font-size: 13px;
+  box-sizing: border-box;
+  min-width: 0;
+  transition: border-color .2s, box-shadow .2s;
+}
+.voiceui-settings-details input[type="checkbox"] { flex: 0; width: 16px; height: 16px; cursor: pointer; }
+.voiceui-settings-details select:focus, .voiceui-settings-details input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Reusable Input Wrapper */
+.voiceui-input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.voiceui-settings-details .voiceui-input-wrapper input {
+  padding-right: 32px;
+  width: 100%;
+}
+.voiceui-expand-btn {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 32px;
+  background: transparent;
+  border: none;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 0;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.voiceui-expand-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-color);
+}
+.voiceui-input-wrapper:hover .voiceui-expand-btn,
+.voiceui-input-wrapper input:focus + .voiceui-expand-btn {
+  opacity: 1;
+}
+
+/* Switch Toggle UI */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border-color);
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 22px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--primary-color); }
+input:checked + .slider:before { transform: translateX(18px); }
+
+/* Reusable Action Button */
+.voiceui-panel-action-btn {
+  background: #3f3f46;
+  color: var(--text-color);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color .2s, transform .1s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.voiceui-panel-action-btn:hover { background: #52525b; transform: translateY(-2px); }
+.voiceui-panel-action-btn:active { transform: translateY(0); }
+.voiceui-panel-action-btn.primary { background: var(--primary-color); color: #fff; }
+.voiceui-panel-action-btn.primary:hover { background: var(--primary-color-hover); }
+.voiceui-panel-action-btn.secondary { background: transparent; color: var(--text-color-secondary); border: 1px solid var(--border-color); }
+.voiceui-panel-action-btn.secondary:hover { background: var(--panel-background-color); color: var(--text-color); border-color: #52525b; }
+.voiceui-panel-action-btn.copied { background: #16a34a; }
+.voiceui-panel-action-btn.copied:hover { transform: translateY(0); }
+
+/* Tooltip */
+.voiceui-tooltip-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.voiceui-help-icon {
+  color: var(--text-color-secondary);
+  cursor: help;
+  width: 16px;
+  height: 16px;
+  transition: color 0.2s;
+}
+.voiceui-help-icon:hover { color: var(--text-color); }
+.voiceui-tooltip-content {
+  display: none;
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  width: max-content;
+  max-width: 320px;
+  font-size: 12px;
+  line-height: 1.5;
+  z-index: 10;
+  text-align: left;
+  pointer-events: none;
+  word-wrap: break-word;
+}
+.voiceui-tooltip-wrapper:hover .voiceui-tooltip-content { display: block; }
+.voiceui-link-button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+}
+.voiceui-link-button:hover { color: var(--primary-color-hover); }
+
+/* Context Edit Modal */
+#voiceui-ctx-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: none; /* Toggled by JS */
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+.voiceui-modal-panel {
+  background: var(--panel-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.5);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+.voiceui-modal-panel h3 { margin: 0; font-size: 20px; color: #fafafa; font-weight: 600; }
+.voiceui-modal-desc { font-size: 13px; color: var(--text-color-secondary); margin: -12px 0 0 0; line-height: 1.6; }
+#voiceui-ctx-textarea {
+  background: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  min-height: 200px;
+  resize: vertical;
+  font-family: inherit;
+}
+#voiceui-ctx-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+.voiceui-modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.voiceui-modal-btn {
+  background: #3f3f46;
+  color: var(--text-color);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color .2s, transform .1s;
+}
+.voiceui-modal-btn.primary { background: var(--primary-color); color: #fff; }
+.voiceui-modal-btn:hover { filter: brightness(1.2); }
+.voiceui-modal-btn:active { transform: scale(0.97); }
+
+/* Toast */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+}
+.toast-message {
+    background: #fafafa;
+    color: #18181b;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    animation: toast-fade-in-out 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes toast-fade-in-out {
+    0% { opacity: 0; transform: translateY(15px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}

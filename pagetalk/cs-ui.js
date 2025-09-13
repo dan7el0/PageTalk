@@ -1,4 +1,5 @@
 
+
 'use strict';
 
 let ui = {};
@@ -42,6 +43,12 @@ function initializeStyles(scale) {
       opacity: 1;
       transform: scale(1);
       pointer-events: auto;
+    }
+    .voiceui-wrap.voiceui-visible.voiceui-idle-enlarged:not(.recording) {
+      transform: scale(1.25);
+    }
+    .voiceui-wrap.voiceui-dragging {
+      transition: none;
     }
     .voiceui-draggable { touch-action: none; }
     .voiceui-btn { width: calc(42px * var(--voiceui-scale)); height: calc(42px * var(--voiceui-scale)); border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,.24); background: #111; color: #fff; position: relative; user-select: none; z-index: 2; }
@@ -127,8 +134,10 @@ function updateUIPosition() {
     const elRect = activeEl.getBoundingClientRect();
     if (elRect.width === 0 || elRect.height === 0 || elRect.top < -50 || elRect.bottom > window.innerHeight + 50) {
       moveToDefaultPosition();
+      ui.wrap.classList.add('voiceui-idle-enlarged');
       return;
     }
+    ui.wrap.classList.remove('voiceui-idle-enlarged');
     const wrapWidth = 42 * state.uiScale;
     const wrapHeight = 42 * state.uiScale;
     
@@ -152,6 +161,7 @@ function updateUIPosition() {
     });
   } else if (!activeEl) {
     moveToDefaultPosition();
+    ui.wrap.classList.add('voiceui-idle-enlarged');
   }
 }
 
@@ -277,6 +287,7 @@ function makeDraggable(container, handle) {
   const onDown = (e) => {
     if (e.type === 'mousedown' && e.button !== 0) return;
     dragging = true;
+    container.classList.add('voiceui-dragging');
     container.dataset.isDragging = 'true';
     container.dataset.dragged = 'false';
 
@@ -296,7 +307,11 @@ function makeDraggable(container, handle) {
     const dy = cy - sy;
 
     if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
-      container.dataset.dragged = 'true';
+      if (container.dataset.dragged !== 'true') {
+        container.dataset.dragged = 'true';
+        // Dispatch a custom event to notify other parts of the app
+        container.dispatchEvent(new CustomEvent('voiceuidragstart'));
+      }
     }
     
     container.style.left = (initialLeft + dx) + 'px';
@@ -307,6 +322,7 @@ function makeDraggable(container, handle) {
 
   const onUp = () => { 
     dragging = false; 
+    container.classList.remove('voiceui-dragging');
     container.dataset.isDragging = 'false';
   };
 

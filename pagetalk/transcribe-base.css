@@ -1,0 +1,86 @@
+:root {
+  --background-color: #18181b;
+  --panel-background-color: #27272a;
+  --border-color: #3f3f46;
+  --text-color: #e4e4e7;
+  --text-color-secondary: #a1a1aa;
+  --primary-color: #3b82f6;
+  --primary-color-hover: #60a5fa;
+  --error-color: #ef4444;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #52525b; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #71717a; }
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+  background-color: var(--background-color);
+  background-image: radial-gradient(circle at 1px 1px, #3f3f46 1px, transparent 0);
+  background-size: 24px 24px;
+  color: var(--text-color);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 24px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.voiceui-panel-main {
+  background: var(--panel-background-color);
+  border-radius: 16px;
+  padding: 28px 32px 24px;
+  width: 100%;
+  max-width: 960px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.5);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid var(--border-color);
+}
+
+.voiceui-header h2 { margin: 0; font-size: 22px; color: #fafafa; font-weight: 600; }
+.voiceui-header p { margin: 4px 0 12px 0; color: var(--text-color-secondary); font-size: 14px; }
+
+.voiceui-content-wrapper {
+  display: flex;
+  gap: 24px;
+}
+
+.voiceui-left-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.voiceui-right-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-color);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+}
+
+/* Footer */
+.voiceui-footer {
+  margin-top: 8px;
+  text-align: center;
+}
+.voiceui-github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #a1a1aa;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color .2s;
+}
+.voiceui-github-link:hover { color: #e4e4e7; }

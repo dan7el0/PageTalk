@@ -13,9 +13,11 @@ const defaultConfig = {
   cancelHotkey: 'Ctrl+.',
   insertMode: 'replaceSelection',
   uiScale: 1,
+  transcribeSpeed: 1,
   clickToToggle: true,
   audioDeviceId: 'default',
   autoCopy: true,
+  removeTrailingPeriod: false,
 };
 
 // This will be populated by loadConfig
@@ -32,6 +34,8 @@ const state = {
   audioDeviceId: cfg.audioDeviceId,
   autoCopy: cfg.autoCopy,
   uiScale: cfg.uiScale,
+  transcribeSpeed: cfg.transcribeSpeed,
+  removeTrailingPeriod: cfg.removeTrailingPeriod,
 };
 
 
@@ -57,6 +61,8 @@ function handleConfigChange(newConfig) {
     state.clickToToggle = newConfig.clickToToggle;
     state.audioDeviceId = newConfig.audioDeviceId;
     state.autoCopy = newConfig.autoCopy;
+    state.removeTrailingPeriod = newConfig.removeTrailingPeriod;
+    state.transcribeSpeed = newConfig.transcribeSpeed;
 
     // This function must be defined in cs-ui.js but called from here
     if (typeof updateUIAfterConfigChange === 'function') {

@@ -1,0 +1,36 @@
+/* Result View */
+.voiceui-panel-result-text {
+  background: #1f1f1f;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 220px;
+  box-sizing: border-box;
+  color: var(--text-color);
+  font-family: inherit;
+  resize: vertical;
+  width: 100%;
+  caret-color: var(--primary-color);
+  transition: border-color .2s, box-shadow .2s, background-color .2s;
+  flex-grow: 1;
+}
+.voiceui-panel-result-text:read-only {
+  background-color: var(--background-color);
+  color: var(--text-color-secondary);
+}
+.voiceui-panel-result-text:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+.voiceui-panel-result-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+.voiceui-panel-main:not([data-state="result"]) .voiceui-panel-result-actions {
+  display: none;
+}

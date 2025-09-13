@@ -1,0 +1,137 @@
+/* Custom Audio Player */
+.voiceui-audio-player {
+  background-color: #f1f5f9;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  border: 1px solid #e2e8f0;
+}
+.player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 4px;
+}
+.player-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+#player-filename {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#player-timedisplay {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: #475569;
+}
+#preview-waveform-container {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  background-color: #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+}
+#preview-canvas {
+  width: 100%;
+  height: 100%;
+}
+#playhead {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background-color: #1e293b;
+  pointer-events: none;
+  opacity: 1; /* Always visible when playing */
+  transition: opacity 0.2s;
+}
+.player-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+.controls-left, .controls-center, .controls-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.player-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: 0;
+  cursor: pointer;
+  color: #64748b;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color .2s, color .2s;
+}
+.player-header .player-btn {
+    width: 32px;
+    height: 32px;
+}
+.player-header .player-btn svg {
+    width: 20px;
+    height: 20px;
+}
+.player-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+#trim-btn svg {
+  fill: none;
+  stroke: currentColor;
+}
+.player-btn:hover {
+  background-color: rgba(0,0,0,0.05);
+  color: #1e293b;
+}
+.player-btn.active {
+  color: var(--primary-color);
+}
+.player-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#play-pause-btn {
+  background-color: #1e293b;
+  color: #fff;
+  width: 44px;
+  height: 44px;
+}
+#play-pause-btn:hover {
+  background-color: #334155;
+  color: #fff;
+}
+#play-pause-btn svg {
+  width: 24px;
+  height: 24px;
+}
+#speed-btn {
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  padding: 0 8px;
+  min-width: 40px;
+  height: 32px;
+  color: #475569;
+}

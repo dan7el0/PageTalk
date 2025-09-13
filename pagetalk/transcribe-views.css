@@ -1,0 +1,114 @@
+/* Transcribe Area Layout & State Management */
+#transcribe-area {
+  position: relative;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+#transcribe-area > .voiceui-idle-view,
+#transcribe-area > .voiceui-loading-view,
+#transcribe-area > .voiceui-error-view,
+#transcribe-area > .voiceui-preview-view {
+  display: none;
+}
+.voiceui-panel-main[data-state="idle"] #transcribe-area > .voiceui-idle-view,
+.voiceui-panel-main[data-state="loading"] #transcribe-area > .voiceui-loading-view,
+.voiceui-panel-main[data-state="error"] #transcribe-area > .voiceui-error-view,
+.voiceui-panel-main[data-state="preview"] #transcribe-area > .voiceui-preview-view,
+.voiceui-panel-main[data-state="result"] #transcribe-area > .voiceui-idle-view {
+  display: flex;
+  flex-grow: 1;
+}
+
+/* Idle View (Dropzone) */
+.voiceui-idle-view {
+  flex-direction: column;
+  gap: 16px;
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.voiceui-idle-view.dragover {
+  border-style: solid;
+  border-color: var(--primary-color);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Loading & Error Views */
+.voiceui-loading-view, .voiceui-error-view {
+  min-height: 280px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-grow: 1;
+}
+.voiceui-loading-text-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.voiceui-loading-timer {
+  font-size: 14px;
+  color: var(--text-color-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+.voiceui-error-view .icon {
+  width: 48px;
+  height: 48px;
+  color: var(--error-color);
+}
+.voiceui-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #555;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: voiceui-spin 1s linear infinite;
+}
+@keyframes voiceui-spin { to { transform: rotate(360deg); } }
+
+/* Preview View */
+.voiceui-preview-view {
+  flex-direction: column;
+  gap: 16px;
+  flex-grow: 1;
+  justify-content: center;
+}
+.voiceui-preview-header {
+  font-size: 14px;
+  color: var(--text-color-secondary);
+  margin: 0;
+  padding: 0 4px;
+}
+.voiceui-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Upload Prompt */
+.voiceui-upload-prompt {
+  text-align: center;
+  color: var(--text-color-secondary);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.voiceui-upload-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.voiceui-upload-prompt small {
+  font-size: 12px;
+  color: #71717a;
+}

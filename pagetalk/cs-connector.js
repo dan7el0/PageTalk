@@ -15,8 +15,9 @@ function connectToServiceWorker() {
         port.postMessage({ type: 'heartbeat' });
         setTimeout(keepAlive, 25000);
       } catch (e) {
-        console.warn("PageTalk: Heartbeat failed, port may be closed.", e);
-        // The onDisconnect listener will handle reconnection.
+        // The port closing is an expected state.
+        // The onDisconnect listener will automatically handle reconnection.
+        // The console warning has been removed as per user request.
       }
     };
     

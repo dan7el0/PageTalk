@@ -1,4 +1,5 @@
 
+
 (async () => {
   'use strict';
 
@@ -59,9 +60,16 @@
   let isLongPress = false;
   const LONG_PRESS_DURATION = 500; // ms
 
+  // Listen for the custom event from cs-ui.js to cancel long press on drag
+  ui.wrap.addEventListener('voiceuidragstart', () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+    }
+  });
+
   ui.btn.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return; // Only for left-click
-      if (ui.wrap.dataset.dragged === 'true' || !state.clickToToggle) return;
+      if (!state.clickToToggle) return;
 
       isLongPress = false; // Reset on new press
       longPressTimer = setTimeout(() => {
@@ -95,10 +103,9 @@
     if (matchesHotkey(e, cfg.hotkey)) {
       e.preventDefault();
       e.stopPropagation();
-      // Ensure there's a place to type or that recording can happen without an input
-      if (getActiveEditable() || isRecording) {
-        toggleRecording();
-      }
+      // Hotkey is global, so we always toggle recording.
+      // If no input is focused, the result will be shown in an overlay.
+      toggleRecording();
     } else if (isRecording && matchesHotkey(e, cfg.cancelHotkey)) {
       e.preventDefault();
       e.stopPropagation();

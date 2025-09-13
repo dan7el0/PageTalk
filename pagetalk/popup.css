@@ -1,11 +1,27 @@
+:root {
+  --background-color: #18181b;
+  --panel-background-color: #27272a;
+  --input-background-color: #1f1f1f;
+  --border-color: #3f3f46;
+  --text-color: #e4e4e7;
+  --text-color-secondary: #a1a1aa;
+  --primary-color: #3b82f6;
+  --primary-color-hover: #60a5fa;
+}
+
 body {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
-  background-color: #1f1f1f;
-  color: #eee;
+  background-color: var(--background-color);
+  color: var(--text-color);
   margin: 0;
-  width: 307px;
+  width: 320px;
+  padding: 8px;
+  box-sizing: border-box;
 }
 .voiceui-panel {
+  background: var(--panel-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
   padding: 16px;
 }
 h3 {
@@ -22,23 +38,73 @@ h3 {
   gap: 12px;
   margin-bottom: 12px;
 }
-.voiceui-panel label {
+/* For rows with a toggle switch, move the switch to the far right */
+.voiceui-row:has(.switch) {
+  justify-content: space-between;
+}
+.voiceui-panel label:not(.switch) {
   font-size: 13px;
-  opacity: .9;
+  color: var(--text-color-secondary);
   flex-basis: 100px;
   flex-shrink: 0;
 }
-.voiceui-panel select, .voiceui-panel input[type="checkbox"], .voiceui-panel input[type="text"], .voiceui-panel input[type="password"] {
-  background: #2d2d2d;
-  color: #eee;
-  border: 1px solid #444;
+.voiceui-panel select, .voiceui-panel input[type="text"], .voiceui-panel input[type="password"] {
+  background: var(--input-background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 8px 10px;
   flex: 1;
   font-size: 13px;
   box-sizing: border-box;
   min-width: 0;
+  transition: border-color .2s, box-shadow .2s;
 }
+
+.voiceui-panel select:focus, .voiceui-panel input[type="text"]:focus, .voiceui-panel input[type="password"]:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.voiceui-input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.voiceui-input-wrapper input {
+  padding-right: 32px;
+  width: 100%;
+}
+.voiceui-expand-btn {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 32px;
+  background: transparent;
+  border: none;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 0;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.voiceui-expand-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-color);
+}
+
+.voiceui-input-wrapper:hover .voiceui-expand-btn,
+.voiceui-input-wrapper input:focus + .voiceui-expand-btn {
+  opacity: 1;
+}
+
 .voiceui-panel input[type="checkbox"] {
   flex: 0;
   width: 16px;
@@ -54,12 +120,13 @@ h3 {
   justify-content: space-between;
 }
 .voiceui-links a {
-  color: #888;
+  color: var(--text-color-secondary);
   font-size: 11px;
   text-decoration: none;
+  transition: color .2s;
 }
 .voiceui-links a:hover {
-  color: #eee;
+  color: var(--text-color);
   text-decoration: underline;
 }
 .voiceui-actions {
@@ -68,7 +135,7 @@ h3 {
   margin-top: 16px;
 }
 .voiceui-actions button {
-  background: #3385ff;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   padding: 8px 16px;
@@ -76,9 +143,10 @@ h3 {
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
+  transition: background-color .2s;
 }
 .voiceui-actions button:hover {
-  background: #4090ff;
+  background: var(--primary-color-hover);
 }
 .voiceui-footer {
   display: flex;
@@ -93,23 +161,154 @@ h3 {
 }
 .voiceui-version {
   font-size: 12px;
-  color: #888;
+  color: var(--text-color-secondary);
 }
 .voiceui-github-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #888;
+  color: var(--text-color-secondary);
   font-size: 12px;
   text-decoration: none;
   transition: color .2s;
 }
 .voiceui-github-link:hover {
-  color: #eee;
+  color: var(--text-color);
 }
 .status-message {
   font-size: 12px;
   text-align: right;
   color: #22c55e;
   height: 15px;
+}
+
+/* Switch Toggle UI */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border-color);
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 22px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(18px);
+  -ms-transform: translateX(18px);
+  transform: translateX(18px);
+}
+
+/* Context Edit Modal */
+.voiceui-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(2px);
+  display: none; /* Toggled by JS */
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+.voiceui-modal-panel {
+  background: var(--panel-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  max-width: 320px; /* Same as body */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+.voiceui-modal-panel h3 {
+  margin: 0;
+  text-align: left;
+}
+.voiceui-modal-desc {
+  font-size: 12px;
+  color: var(--text-color-secondary);
+  margin: -8px 0 0 0;
+  line-height: 1.5;
+}
+#voiceui-ctx-textarea {
+  background: var(--input-background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  min-height: 150px;
+  resize: vertical;
+  font-family: inherit;
+}
+#voiceui-ctx-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+.voiceui-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.voiceui-modal-btn {
+  background: var(--border-color);
+  color: var(--text-color);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color .2s;
+}
+.voiceui-modal-btn.primary {
+  background: var(--primary-color);
+  color: #fff;
+}
+.voiceui-modal-btn:hover {
+  filter: brightness(1.2);
 }

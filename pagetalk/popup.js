@@ -10,8 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelHotkey: 'Ctrl+.',
     insertMode: 'replaceSelection',
     uiScale: 1,
+    transcribeSpeed: 1,
     clickToToggle: true,
     autoCopy: true,
+    removeTrailingPeriod: false,
   };
 
   const providerSelect = document.getElementById('voiceui-provider');
@@ -22,13 +24,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const micSelect = document.getElementById('voiceui-mic');
   const itnCheckbox = document.getElementById('voiceui-itn');
   const autoCopyCheckbox = document.getElementById('voiceui-autocopy');
+  const removePeriodCheckbox = document.getElementById('voiceui-remove-period');
   const ctxInput = document.getElementById('voiceui-ctx');
   const clickSelect = document.getElementById('voiceui-click');
   const scaleSelect = document.getElementById('voiceui-scale');
+  const speedSelect = document.getElementById('voiceui-speed');
   const hotkeyInput = document.getElementById('voiceui-hotkey');
   const cancelHotkeyInput = document.getElementById('voiceui-cancel-hotkey');
   const statusEl = document.getElementById('status');
   const versionEl = document.querySelector('.voiceui-version');
+  const transcribeLink = document.getElementById('open-transcribe-page');
+
+  // New modal elements
+  const ctxExpandBtn = document.getElementById('voiceui-ctx-expand');
+  const ctxModal = document.getElementById('voiceui-ctx-modal');
+  const ctxTextarea = document.getElementById('voiceui-ctx-textarea');
+  const ctxSaveBtn = document.getElementById('voiceui-ctx-save');
+  const ctxCancelBtn = document.getElementById('voiceui-ctx-cancel');
 
   // Dynamically set version
   if (versionEl) {
@@ -126,9 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
       micSelect.value = config.audioDeviceId;
       itnCheckbox.checked = config.enable_itn;
       autoCopyCheckbox.checked = config.autoCopy;
+      removePeriodCheckbox.checked = config.removeTrailingPeriod;
       ctxInput.value = config.context;
       clickSelect.value = String(config.clickToToggle);
       scaleSelect.value = String(config.uiScale);
+      speedSelect.value = String(config.transcribeSpeed);
       hotkeyInput.value = config.hotkey;
       cancelHotkeyInput.value = config.cancelHotkey;
 
@@ -147,10 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
       audioDeviceId: micSelect.value,
       enable_itn: itnCheckbox.checked,
       autoCopy: autoCopyCheckbox.checked,
+      removeTrailingPeriod: removePeriodCheckbox.checked,
       context: ctxInput.value,
       insertMode: 'replaceSelection',
       clickToToggle: clickSelect.value === 'true',
       uiScale: Number(scaleSelect.value) || 1,
+      transcribeSpeed: Number(speedSelect.value) || 1,
       hotkey: hotkeyInput.value.trim(),
       cancelHotkey: cancelHotkeyInput.value.trim()
     };
@@ -228,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     listMicrophones();
   });
   
-  [providerSelect, apiKeyInput, langSelect, micSelect, itnCheckbox, autoCopyCheckbox, ctxInput, clickSelect, scaleSelect, hotkeyInput, cancelHotkeyInput].forEach(input => {
+  [providerSelect, apiKeyInput, langSelect, micSelect, itnCheckbox, autoCopyCheckbox, removePeriodCheckbox, ctxInput, clickSelect, scaleSelect, speedSelect, hotkeyInput, cancelHotkeyInput].forEach(input => {
     input.addEventListener('change', saveConfig);
   });
 
@@ -237,4 +253,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupHotkeyInput(hotkeyInput);
   setupHotkeyInput(cancelHotkeyInput);
+
+  if (transcribeLink) {
+    transcribeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: 'transcribe.html' });
+      window.close();
+    });
+  }
+
+  // Modal logic
+  if (ctxExpandBtn) {
+    ctxExpandBtn.addEventListener('click', () => {
+      ctxTextarea.value = ctxInput.value;
+      ctxModal.style.display = 'flex';
+      ctxTextarea.focus();
+    });
+
+    ctxCancelBtn.addEventListener('click', () => {
+      ctxModal.style.display = 'none';
+    });
+
+    ctxSaveBtn.addEventListener('click', () => {
+      ctxInput.value = ctxTextarea.value;
+      saveConfig();
+      ctxModal.style.display = 'none';
+    });
+  }
+
+  window.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && ctxModal.style.display !== 'none') {
+          ctxModal.style.display = 'none';
+      }
+  });
 });

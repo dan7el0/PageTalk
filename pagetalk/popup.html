@@ -7,9 +7,8 @@
 </head>
 <body>
   <div class="voiceui-panel">
-    <h3>设置</h3>
     <div class="voiceui-row"><label for="voiceui-provider">API 服务</label><select id="voiceui-provider">
-        <option value="free">Free</option>
+        <option value="free">共享线路</option>
         <option value="dashscope">阿里云百炼</option>
     </select></div>
     <div class="voiceui-row"><label for="voiceui-apikey">阿里云百炼 Key</label><input type="password" id="voiceui-apikey" placeholder="sk-..." /></div>
@@ -37,24 +36,62 @@
     <div class="voiceui-row"><label for="voiceui-mic">麦克风</label><select id="voiceui-mic">
         <option value="default">默认设备</option>
     </select></div>
-    <div class="voiceui-row"><label for="voiceui-itn" title="启用后，会将语音识别结果中的数字、日期、度量单位等格式化为书面语，例如将“一百块”转换为“100元”。">逆向文本标准化</label><input type="checkbox" id="voiceui-itn" /></div>
-    <div class="voiceui-row"><label for="voiceui-ctx">上下文</label><input type="text" id="voiceui-ctx" placeholder="专业词汇可提升识别率" /></div>
-    <div class="voiceui-row"><label for="voiceui-autocopy" title="启用后，识别成功的文本会自动复制到剪贴板。">自动复制</label><input type="checkbox" id="voiceui-autocopy" /></div>
+    <div class="voiceui-row"><label for="voiceui-itn" title="启用后，会将语音识别结果中的数字、日期、度量单位等格式化为书面语，例如将“一百块”转换为“100元”。">逆向文本标准化</label><label class="switch"><input type="checkbox" id="voiceui-itn" /><span class="slider"></span></label></div>
+    <div class="voiceui-row">
+      <label for="voiceui-ctx">上下文</label>
+      <div class="voiceui-input-wrapper">
+        <input type="text" id="voiceui-ctx" placeholder="" />
+        <button type="button" id="voiceui-ctx-expand" class="voiceui-expand-btn" title="展开编辑">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="voiceui-row"><label for="voiceui-autocopy" title="启用后，识别成功的文本会自动复制到剪贴板。">自动复制</label><label class="switch"><input type="checkbox" id="voiceui-autocopy" /><span class="slider"></span></label></div>
+    <div class="voiceui-row"><label for="voiceui-remove-period" title="启用后，会自动移除中文模式下句末的句号“。”。">去掉句末句号</label><label class="switch"><input type="checkbox" id="voiceui-remove-period" /><span class="slider"></span></label></div>
     <div class="voiceui-row"><label for="voiceui-click">悬浮按钮</label><select id="voiceui-click"><option value="true">显示并可点击</option><option value="false">隐藏 (仅用快捷键)</option></select></div>
     <div class="voiceui-row"><label for="voiceui-scale">UI 缩放</label><select id="voiceui-scale"><option value="0.9">0.9x</option><option value="1">1.0x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="1.75">1.75x</option><option value="2">2.0x</option></select></div>
+    <div class="voiceui-row">
+      <label for="voiceui-speed" title="启用后，会在转录前对音频进行加速处理，可以节省长音频的转录时间，但可能会略微影响准确率。">转录倍速</label>
+      <select id="voiceui-speed">
+        <option value="1">1.0x (正常)</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="1.75">1.75x</option>
+        <option value="2">2.0x</option>
+      </select>
+    </div>
     <div class="voiceui-row"><label for="voiceui-hotkey">快捷键</label><input type="text" id="voiceui-hotkey" /></div>
     <div class="voiceui-row"><label for="voiceui-cancel-hotkey">取消快捷键</label><input type="text" id="voiceui-cancel-hotkey" /></div>
     <div class="voiceui-footer">
       <div class="voiceui-footer-left">
-        <span class="voiceui-version">版本: 1.1.0</span>
+        <span class="voiceui-version">版本: 2.0.0</span>
         <a href="https://github.com/yeahhe365/PageTalk" target="_blank" rel="noopener noreferrer" class="voiceui-github-link" title="在 GitHub 上查看项目">
           <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14" aria-hidden="true">
             <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.34c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.22.82 1.22.82.71 1.21 1.87.86 2.33.66.07-.51.28-.86.51-1.06-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"></path>
           </svg>
           <span>GitHub</span>
         </a>
+        <a href="#" id="open-transcribe-page" class="voiceui-github-link" title="打开文件转录页面">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block; opacity: .9;"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          <span>文件转录</span>
+        </a>
       </div>
       <div id="status" class="status-message"></div>
+    </div>
+  </div>
+  <div id="voiceui-ctx-modal" class="voiceui-modal-overlay">
+    <div class="voiceui-modal-panel">
+      <h3>编辑上下文</h3>
+      <p class="voiceui-modal-desc">输入专业词汇、特定短语或格式示例以提升识别准确率，每行一个。</p>
+      <textarea id="voiceui-ctx-textarea"></textarea>
+      <div class="voiceui-modal-actions">
+        <button id="voiceui-ctx-cancel" type="button" class="voiceui-modal-btn">取消</button>
+        <button id="voiceui-ctx-save" type="button" class="voiceui-modal-btn primary">保存</button>
+      </div>
     </div>
   </div>
   <script src="popup.js"></script>
