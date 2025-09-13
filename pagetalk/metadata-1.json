@@ -1,0 +1,7 @@
+{
+  "name": "PageTalk",
+  "description": "A Chrome extension that adds a floating microphone button to any webpage, allowing for voice-to-text input in any text field using the Qwen ASR API.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

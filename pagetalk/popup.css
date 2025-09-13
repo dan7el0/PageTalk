@@ -1,0 +1,96 @@
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+  background-color: #1f1f1f;
+  color: #eee;
+  margin: 0;
+  width: 307px;
+}
+.voiceui-panel {
+  padding: 16px;
+}
+h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 16px;
+  color: #fff;
+  font-weight: 500;
+  text-align: center;
+}
+.voiceui-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.voiceui-panel label {
+  font-size: 13px;
+  opacity: .9;
+  flex-basis: 100px;
+  flex-shrink: 0;
+}
+.voiceui-panel select, .voiceui-panel input[type="checkbox"], .voiceui-panel input[type="text"], .voiceui-panel input[type="password"] {
+  background: #2d2d2d;
+  color: #eee;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 8px 10px;
+  flex: 1;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.voiceui-panel input[type="checkbox"] {
+  flex: 0;
+  width: 16px;
+  height: 16px;
+}
+.voiceui-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.voiceui-actions button {
+  background: #3385ff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+.voiceui-actions button:hover {
+  background: #4090ff;
+}
+.voiceui-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+.voiceui-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.voiceui-version {
+  font-size: 12px;
+  color: #888;
+}
+.voiceui-github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #888;
+  font-size: 12px;
+  text-decoration: none;
+  transition: color .2s;
+}
+.voiceui-github-link:hover {
+  color: #eee;
+}
+.status-message {
+  font-size: 12px;
+  text-align: right;
+  color: #22c55e;
+  height: 15px;
+}
