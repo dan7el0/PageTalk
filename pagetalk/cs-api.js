@@ -9,6 +9,86 @@ function blobToBase64(blob) {
   });
 }
 
+async function callOpenAIAPI(text, options) {
+  if (!options.openaiApiKey || !options.openaiBaseUrl || !options.openaiModelId) {
+    toast('请先配置文本后处理的 API 信息。');
+    throw new Error('未配置 OpenAI 兼容 API');
+  }
+
+  const fullUrl = new URL('chat/completions', options.openaiBaseUrl.endsWith('/') ? options.openaiBaseUrl : options.openaiBaseUrl + '/').href;
+
+  const payload = {
+    url: fullUrl,
+    apiKey: options.openaiApiKey,
+    model: options.openaiModelId,
+    text: text,
+    systemPrompt: options.openaiSystemPrompt
+  };
+
+  const response = await chrome.runtime.sendMessage({
+    type: 'callOpenAIAPI',
+    payload: payload
+  });
+
+  if (response.success) {
+    const content = response.data?.choices?.[0]?.message?.content;
+    if (content) {
+      return content.trim();
+    } else {
+      throw new Error('API 未能返回有效文本');
+    }
+  } else {
+    throw new Error(response.error || '请求失败');
+  }
+}
+
+async function callConsoleAPI(text, options) {
+  if (!options.consoleApiKey || !options.consoleBaseUrl || !options.consoleModelId) {
+    toast('请先配置控制台命令的 API 信息。');
+    throw new Error('未配置 Console API');
+  }
+
+  const fullUrl = new URL('chat/completions', options.consoleBaseUrl.endsWith('/') ? options.consoleBaseUrl : options.consoleBaseUrl + '/').href;
+
+  const payload = {
+    url: fullUrl,
+    apiKey: options.consoleApiKey,
+    model: options.consoleModelId,
+    text: text,
+    systemPrompt: options.consoleSystemPrompt
+  };
+
+  const response = await chrome.runtime.sendMessage({
+    type: 'callConsoleAPI',
+    payload: payload
+  });
+
+  if (response.success) {
+    const content = response.data?.choices?.[0]?.message?.content;
+    if (content) {
+      let command = content.trim();
+      const matchJson = command.match(/```json\s*([\s\S]*?)\s*```/);
+      if (matchJson && matchJson[1]) {
+        command = matchJson[1].trim();
+      } else {
+          const matchGeneric = command.match(/```\s*([\s\S]*?)\s*```/);
+          if (matchGeneric && matchGeneric[1]) {
+              command = matchGeneric[1].trim();
+          }
+      }
+      if ((command.startsWith('`') && command.endsWith('`'))) {
+        command = command.substring(1, command.length - 1);
+      }
+      return command;
+    } else {
+      throw new Error('API 未能返回有效命令');
+    }
+  } else {
+    throw new Error(response.error || '请求失败');
+  }
+}
+
+
 async function callFreeASRAPI(audioBlob, options) {
   const base64 = await blobToBase64(audioBlob);
 
@@ -81,7 +161,7 @@ async function callDashScopeASRAPI(audioBlob, options) {
   messages.push({ role: "user", content: [{ audio: audioDataURI }] });
 
   const payload = {
-    model: "qwen3-asr-flash",
+    model: options.dashscopeModelId || "qwen3-asr-flash",
     input: {
       messages: messages
     },
@@ -120,5 +200,107 @@ async function callDashScopeASRAPI(audioBlob, options) {
     }
   } else {
     throw new Error(response.error || '请求失败');
+  }
+}
+
+async function callDashScopeASRAPIStream(audioBlob, options, callbacks) {
+    const { onChunk, onFinish, onError } = callbacks;
+    if (!options.apiKey) {
+        const error = new Error('未提供阿里云百炼 API Key');
+        toast('请点击浏览器右上角的扩展图标，设置您的阿里云百炼 API Key。');
+        onError(error);
+        return;
+    }
+    
+    const base64 = await blobToBase64(audioBlob);
+    const audioDataURI = `data:audio/wav;base64,${base64}`;
+
+    const system_parts = [];
+    if (options.language && options.language !== 'auto') system_parts.push(`asr language:${options.language}`);
+    if (options.context) system_parts.push(options.context);
+    
+    const messages = [];
+    if (system_parts.length > 0) messages.push({ role: "system", content: [{ text: system_parts.join('\n') }] });
+    messages.push({ role: "user", content: [{ audio: audioDataURI }] });
+
+    const payload = {
+        model: options.dashscopeModelId || "qwen3-asr-flash",
+        input: { messages },
+        parameters: {
+            incremental_output: true,
+            asr_options: { enable_lid: options.language === 'auto', enable_itn: !!options.enable_itn }
+        }
+    };
+    
+    const apiOptions = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${options.apiKey}`,
+            "X-DashScope-SSE": "enable"
+        },
+        body: JSON.stringify(payload)
+    };
+
+    let accumulatedText = '';
+    let finalLang = '';
+
+    const messageListener = (request, sender, sendResponse) => {
+        if (request.type === 'asrStreamChunk') {
+            const choice = request.payload?.output?.choices?.[0];
+            if (!choice) return;
+
+            const textChunk = choice.message?.content?.[0]?.text || '';
+            if (textChunk) {
+                accumulatedText += textChunk;
+                onChunk(accumulatedText);
+            }
+            
+            const lang = choice.message?.annotations?.find(a => a.type === 'audio_info')?.language || '';
+            if (lang) finalLang = lang;
+            
+            if (choice.finish_reason === 'stop') {
+                chrome.runtime.onMessage.removeListener(messageListener);
+                onFinish(accumulatedText, finalLang);
+            }
+        } else if (request.type === 'asrStreamEnd') {
+            chrome.runtime.onMessage.removeListener(messageListener);
+            onFinish(accumulatedText, finalLang);
+        } else if (request.type === 'asrStreamError') {
+            chrome.runtime.onMessage.removeListener(messageListener);
+            onError(new Error(request.error));
+        }
+    };
+
+    chrome.runtime.onMessage.addListener(messageListener);
+    
+    chrome.runtime.sendMessage({
+        type: 'callStreamingASRAPI',
+        payload: { url: API_ENDPOINT, options: apiOptions }
+    });
+}
+
+async function processConsoleCommand(text) {
+  if (!state.enableConsoleControl || !text) {
+    return false;
+  }
+  try {
+    toast('正在生成命令…');
+    const command = await callConsoleAPI(text, state);
+    toast(`执行命令…\n${command}`);
+    chrome.runtime.sendMessage({ type: 'executeConsoleCommand', payload: { command } });
+    if (ui.badge) {
+        ui.badge.textContent = 'CMD';
+        ui.badge.style.background = '#3b82f6';
+    }
+    return true;
+  } catch (err) {
+    console.error('Console Command error:', err);
+    toast('命令生成或执行失败: ' + (err?.message || err));
+    if (ui.badge) {
+        ui.badge.textContent = '!';
+        ui.badge.style.background = '#ef4444';
+    }
+    return false;
   }
 }

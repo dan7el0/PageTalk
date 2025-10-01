@@ -23,29 +23,50 @@ function handleFile(file, onFileReady) {
 }
 
 export function initFileHandler(onFileReady) {
-  const { transcribeArea, idleView, uploadLinkBtn, fileInput, mainPanel } = uiElements;
+  const { idleView, uploadLinkBtn, fileInput, mainPanel } = uiElements;
+  let dragCounter = 0;
   
-  transcribeArea.addEventListener('dragenter', e => {
+  // Prevent default behavior for dragover to allow drop
+  window.addEventListener('dragover', e => {
     e.preventDefault();
-    if (mainPanel.dataset.state === 'idle') {
+  });
+
+  window.addEventListener('dragenter', e => {
+    e.preventDefault();
+    if (mainPanel.dataset.state === 'idle' || mainPanel.dataset.state === 'error') {
+      dragCounter++;
       idleView.classList.add('dragover');
     }
   });
-  transcribeArea.addEventListener('dragover', e => e.preventDefault());
-  transcribeArea.addEventListener('dragleave', e => {
+
+  window.addEventListener('dragleave', e => {
     e.preventDefault();
-    idleView.classList.remove('dragover');
+    if (mainPanel.dataset.state === 'idle' || mainPanel.dataset.state === 'error') {
+      dragCounter--;
+      if (dragCounter === 0) {
+        idleView.classList.remove('dragover');
+      }
+    }
   });
-  transcribeArea.addEventListener('drop', e => {
+
+  window.addEventListener('drop', e => {
     e.preventDefault();
+    // Unconditionally reset UI feedback
+    dragCounter = 0;
     idleView.classList.remove('dragover');
+    
+    // Only handle file if in correct state
     if (mainPanel.dataset.state === 'idle' || mainPanel.dataset.state === 'error') {
       handleFile(e.dataTransfer.files?.[0], onFileReady);
     }
   });
 
   uploadLinkBtn.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', () => {
-    handleFile(fileInput.files?.[0], onFileReady);
+  fileInput.addEventListener('change', (e) => {
+    handleFile(e.target.files?.[0], onFileReady);
+    // Reset file input value to allow uploading the same file again
+    if(e.target) {
+        e.target.value = '';
+    }
   });
 }

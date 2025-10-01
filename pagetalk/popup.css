@@ -37,16 +37,26 @@ h3 {
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
-}
-/* For rows with a toggle switch, move the switch to the far right */
-.voiceui-row:has(.switch) {
   justify-content: space-between;
 }
+
 .voiceui-panel label:not(.switch) {
   font-size: 13px;
   color: var(--text-color-secondary);
   flex-basis: 100px;
   flex-shrink: 0;
+}
+.voiceui-panel .label-container {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  flex-basis: 100px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.voiceui-panel .label-container label {
+    flex-basis: auto;
 }
 .voiceui-panel select, .voiceui-panel input[type="text"], .voiceui-panel input[type="password"] {
   background: var(--input-background-color);
@@ -182,6 +192,30 @@ h3 {
   height: 15px;
 }
 
+/* Star Count */
+.github-star-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 2px;
+  font-weight: 500;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.github-star-count.loaded {
+  opacity: 1;
+}
+.github-star-count::before {
+  content: '★';
+  color: #facc15;
+  font-size: 10px;
+}
+
 /* Switch Toggle UI */
 .switch {
   position: relative;
@@ -234,6 +268,67 @@ input:checked + .slider:before {
   -ms-transform: translateX(18px);
   transform: translateX(18px);
 }
+
+/* Tooltip */
+.voiceui-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.voiceui-help-icon {
+  color: var(--text-color-secondary);
+  cursor: help;
+  width: 14px;
+  height: 14px;
+  transition: color 0.2s;
+  display: block;
+}
+.voiceui-help-icon:hover { color: var(--text-color); }
+.voiceui-tooltip-content {
+  display: none;
+  position: absolute;
+  bottom: 150%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  width: max-content;
+  max-width: 280px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  z-index: 10;
+  text-align: left;
+  pointer-events: none;
+}
+.voiceui-tooltip-wrapper:hover .voiceui-tooltip-content { display: block; }
+
+.voiceui-input-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.voiceui-config-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color-secondary);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.voiceui-config-btn:hover {
+    background: var(--border-color);
+    color: var(--text-color);
+}
+
 
 /* Context Edit Modal */
 .voiceui-modal-overlay {
@@ -311,4 +406,154 @@ input:checked + .slider:before {
 }
 .voiceui-modal-btn:hover {
   filter: brightness(1.2);
+}
+
+.voiceui-modal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.voiceui-modal-panel .voiceui-modal-row:last-of-type {
+  margin-bottom: 0;
+}
+.voiceui-modal-row label {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  text-align: left;
+}
+.voiceui-modal-row input {
+  background: var(--input-background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.voiceui-modal-row input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.voiceui-modal-row textarea {
+  background: var(--input-background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.voiceui-modal-row textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.voiceui-modal-panel .voiceui-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.voiceui-modal-panel .voiceui-input-wrapper input {
+  padding-right: 32px;
+}
+.voiceui-fetch-models-btn {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 32px;
+  background: transparent;
+  border: none;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 0;
+  transition: all .2s;
+}
+.voiceui-fetch-models-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-color);
+}
+.voiceui-fetch-models-btn:disabled {
+  cursor: not-allowed;
+  background: transparent;
+  color: var(--text-color-secondary);
+}
+.voiceui-fetch-models-btn .icon-spinner {
+    animation: popup-spin 1s linear infinite;
+}
+@keyframes popup-spin { to { transform: rotate(360deg); } }
+
+
+/* Slider for speed control */
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+.slider-wrapper input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 3px;
+  outline: none;
+  padding: 0;
+  box-shadow: none;
+  transition: background-color .2s;
+}
+.slider-wrapper input[type="range"]:hover {
+  background: #5f5f66;
+}
+.slider-wrapper input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--text-color);
+  cursor: pointer;
+  border-radius: 50%;
+  border: none;
+  transition: background-color .2s;
+}
+.slider-wrapper input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--text-color);
+  cursor: pointer;
+  border-radius: 50%;
+  border: none;
+  transition: background-color .2s;
+}
+.slider-wrapper input[type="range"]:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+.slider-wrapper input[type="range"]:hover::-webkit-slider-thumb {
+  background: #fff;
+}
+.slider-wrapper input[type="range"]:hover::-moz-range-thumb {
+  background: #fff;
+}
+
+.slider-value {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  min-width: 45px;
+  text-align: right;
 }

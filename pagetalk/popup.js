@@ -1,289 +1,196 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const defaultConfig = {
-    apiProvider: 'free',
-    apiKey: '',
-    language: 'auto',
-    audioDeviceId: 'default',
-    enable_itn: false,
-    context: '',
-    hotkey: 'Ctrl+/',
-    cancelHotkey: 'Ctrl+.',
+import { loadConfig } from './popup-config.js';
+import { elements } from './popup-dom.js';
+import {
+  updateUIFromConfig,
+  toggleProviderSpecificRows,
+  listMicrophones,
+  setupHotkeyInput,
+  initModals,
+  setStatusMessage,
+} from './popup-ui.js';
+
+function getConfigFromUI() {
+  const {
+    providerSelect, apiKeyInput, langSelect, micSelect, dashscopeModelSelect,
+    itnCheckbox, streamingCheckbox, autoCopyCheckbox, removePeriodCheckbox,
+    ctxInput, openaiProcessingCheckbox, openaiBaseUrlInput, openaiApiKeyInput,
+    openaiModelIdInput, openaiSystemPromptTextarea, consoleControlCheckbox,
+    consoleBaseUrlInput, consoleApiKeyInput, consoleModelIdInput,
+    consoleSystemPromptTextarea, buttonModeSelect, scaleSelect, speedSlider,
+    hotkeyInput, cancelHotkeyInput,
+  } = elements;
+
+  const buttonMode = buttonModeSelect.value;
+  let clickToToggle;
+  let hideOnNoFocus;
+  switch (buttonMode) {
+    case 'always':
+      clickToToggle = true;
+      hideOnNoFocus = false;
+      break;
+    case 'auto':
+      clickToToggle = true;
+      hideOnNoFocus = true;
+      break;
+    case 'hidden':
+    default:
+      clickToToggle = false;
+      hideOnNoFocus = false;
+      break;
+  }
+
+  return {
+    apiProvider: providerSelect.value,
+    apiKey: apiKeyInput.value.trim(),
+    language: langSelect.value,
+    audioDeviceId: micSelect.value,
+    dashscopeModelId: dashscopeModelSelect.value,
+    enable_itn: itnCheckbox.checked,
+    enableStreaming: streamingCheckbox.checked,
+    autoCopy: autoCopyCheckbox.checked,
+    removeTrailingPeriod: removePeriodCheckbox.checked,
+    context: ctxInput.value,
+    enableOpenaiProcessing: openaiProcessingCheckbox.checked,
+    openaiBaseUrl: openaiBaseUrlInput.value.trim(),
+    openaiApiKey: openaiApiKeyInput.value.trim(),
+    openaiModelId: openaiModelIdInput.value.trim(),
+    openaiSystemPrompt: openaiSystemPromptTextarea.value.trim(),
+    enableConsoleControl: consoleControlCheckbox.checked,
+    consoleBaseUrl: consoleBaseUrlInput.value.trim(),
+    consoleApiKey: consoleApiKeyInput.value.trim(),
+    consoleModelId: consoleModelIdInput.value.trim(),
+    consoleSystemPrompt: consoleSystemPromptTextarea.value.trim(),
     insertMode: 'replaceSelection',
-    uiScale: 1,
-    transcribeSpeed: 1,
-    clickToToggle: true,
-    autoCopy: true,
-    removeTrailingPeriod: false,
+    clickToToggle: clickToToggle,
+    hideOnNoFocus: hideOnNoFocus,
+    uiScale: Number(scaleSelect.value) || 1,
+    transcribeSpeed: Number(speedSlider.value) || 1,
+    hotkey: hotkeyInput.value.trim(),
+    cancelHotkey: cancelHotkeyInput.value.trim()
   };
+}
 
-  const providerSelect = document.getElementById('voiceui-provider');
-  const apiKeyInput = document.getElementById('voiceui-apikey');
-  const apiKeyRow = apiKeyInput.closest('.voiceui-row');
-  const apiKeyLinksRow = document.getElementById('voiceui-apikey-links-row');
-  const langSelect = document.getElementById('voiceui-lang');
-  const micSelect = document.getElementById('voiceui-mic');
-  const itnCheckbox = document.getElementById('voiceui-itn');
-  const autoCopyCheckbox = document.getElementById('voiceui-autocopy');
-  const removePeriodCheckbox = document.getElementById('voiceui-remove-period');
-  const ctxInput = document.getElementById('voiceui-ctx');
-  const clickSelect = document.getElementById('voiceui-click');
-  const scaleSelect = document.getElementById('voiceui-scale');
-  const speedSelect = document.getElementById('voiceui-speed');
-  const hotkeyInput = document.getElementById('voiceui-hotkey');
-  const cancelHotkeyInput = document.getElementById('voiceui-cancel-hotkey');
-  const statusEl = document.getElementById('status');
-  const versionEl = document.querySelector('.voiceui-version');
-  const transcribeLink = document.getElementById('open-transcribe-page');
-
-  // New modal elements
-  const ctxExpandBtn = document.getElementById('voiceui-ctx-expand');
-  const ctxModal = document.getElementById('voiceui-ctx-modal');
-  const ctxTextarea = document.getElementById('voiceui-ctx-textarea');
-  const ctxSaveBtn = document.getElementById('voiceui-ctx-save');
-  const ctxCancelBtn = document.getElementById('voiceui-ctx-cancel');
-
-  // Dynamically set version
-  if (versionEl) {
-    const manifest = chrome.runtime.getManifest();
-    versionEl.textContent = `版本: ${manifest.version}`;
-  }
-
-  function toggleApiKeyVisibility() {
-    if (providerSelect.value === 'free') {
-      apiKeyRow.style.display = 'none';
-      apiKeyLinksRow.style.display = 'none';
+function saveConfig() {
+  const configToSave = getConfigFromUI();
+  chrome.storage.sync.set({ pagetalk_config: configToSave }, () => {
+    if (chrome.runtime.lastError) {
+      setStatusMessage('保存失败！', true, elements);
+      console.error("Error saving config:", chrome.runtime.lastError);
     } else {
-      apiKeyRow.style.display = 'flex';
-      apiKeyLinksRow.style.display = 'flex';
+      setStatusMessage('已保存！', false, elements);
     }
-  }
+  });
+}
 
-  async function listMicrophones() {
-    const openOptionsPage = () => chrome.runtime.openOptionsPage();
+async function loadAndApplyConfig() {
+    try {
+        const config = await loadConfig();
+        updateUIFromConfig(config, elements);
+    } catch(e) {
+        setStatusMessage('加载配置失败！', true, elements);
+    }
+}
 
-    const guideToOptions = (message) => {
-      micSelect.innerHTML = `<option value="error" disabled>${message}</option>`;
-      micSelect.removeEventListener('click', openOptionsPage);
-      micSelect.addEventListener('click', openOptionsPage, { once: true });
-    };
+
+function initEventListeners() {
+    const {
+        providerSelect, apiKeyInput, dashscopeModelSelect, langSelect, micSelect,
+        itnCheckbox, streamingCheckbox, autoCopyCheckbox, removePeriodCheckbox,
+        ctxInput, buttonModeSelect, scaleSelect, speedSlider, speedValue, hotkeyInput,
+        cancelHotkeyInput, openaiProcessingCheckbox, consoleControlCheckbox,
+        transcribeLink, versionEl
+    } = elements;
+
+    const inputsForSave = [
+        providerSelect, apiKeyInput, dashscopeModelSelect, langSelect, micSelect,
+        itnCheckbox, streamingCheckbox, autoCopyCheckbox, removePeriodCheckbox,
+        ctxInput, buttonModeSelect, scaleSelect, speedSlider, hotkeyInput,
+        cancelHotkeyInput, openaiProcessingCheckbox, consoleControlCheckbox
+    ];
+
+    inputsForSave.forEach(input => {
+        input.addEventListener('change', saveConfig);
+    });
+
+    openaiProcessingCheckbox.addEventListener('change', () => {
+        if (openaiProcessingCheckbox.checked) {
+            consoleControlCheckbox.checked = false;
+        }
+    });
+
+    consoleControlCheckbox.addEventListener('change', () => {
+        if (consoleControlCheckbox.checked) {
+            openaiProcessingCheckbox.checked = false;
+        }
+    });
+
+    speedSlider.addEventListener('input', () => {
+        if (speedValue) {
+            speedValue.textContent = `${Number(speedSlider.value).toFixed(2)}x`;
+        }
+    });
+
+    providerSelect.addEventListener('change', () => toggleProviderSpecificRows(elements));
+    navigator.mediaDevices?.addEventListener?.('devicechange', () => listMicrophones(elements));
+
+    setupHotkeyInput(hotkeyInput, saveConfig);
+    setupHotkeyInput(cancelHotkeyInput, saveConfig);
+    
+    initModals(elements, saveConfig, loadAndApplyConfig);
+
+    if (transcribeLink) {
+        transcribeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            chrome.tabs.create({ url: 'transcribe.html' });
+            window.close();
+        });
+    }
+
+    if (versionEl) {
+        const manifest = chrome.runtime.getManifest();
+        versionEl.textContent = `版本: ${manifest.version}`;
+    }
+
+    window.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            if(elements.ctxModal.style.display !== 'none') {
+                elements.ctxModal.style.display = 'none';
+            }
+            if(elements.openaiModal.style.display !== 'none') {
+                elements.openaiModal.style.display = 'none';
+            }
+            if(elements.consoleModal.style.display !== 'none') {
+                elements.consoleModal.style.display = 'none';
+            }
+        }
+    });
+}
+
+async function fetchAndDisplayGitHubStars() {
+    const starCountEl = document.getElementById('github-stars-popup');
+    if (!starCountEl) return;
 
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-        micSelect.innerHTML = '<option value="error" disabled>不支持设备选择</option>';
-        return;
-      }
-      
-      const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+        const response = await fetch('https://api.github.com/repos/yeahhe365/PageTalk');
+        if (!response.ok) {
+            throw new Error(`GitHub API returned ${response.status}`);
+        }
+        const data = await response.json();
+        const stars = data.stargazers_count;
 
-      if (permissionStatus.state !== 'granted') {
-        guideToOptions('需要权限(点击授权)');
-        return;
-      }
-
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const audioInputDevices = devices.filter(d => d.kind === 'audioinput');
-
-      if (audioInputDevices.length === 0) {
-        micSelect.innerHTML = '<option value="error" disabled>未找到麦克风</option>';
-        return;
-      }
-      
-      if (!audioInputDevices.some(d => d.label)) {
-        guideToOptions('请在选项页刷新设备');
-        return;
-      }
-
-      const currentValue = micSelect.value;
-      micSelect.innerHTML = '<option value="default">默认设备</option>';
-
-      audioInputDevices.forEach(device => {
-        const option = document.createElement('option');
-        option.value = device.deviceId;
-        option.textContent = device.label || `麦克风 ${micSelect.options.length}`;
-        micSelect.appendChild(option);
-      });
-
-      if ([...micSelect.options].some(o => o.value === currentValue)) {
-        micSelect.value = currentValue;
-      } else {
-        micSelect.value = 'default';
-      }
-    } catch (err) {
-      console.error('Error listing microphones:', err.name, err.message);
-      const errorMap = {
-        NotAllowedError: '需要麦克风权限',
-        NotFoundError: '未找到麦克风设备',
-        NotReadableError: '麦克风硬件错误',
-        AbortError: '请求被中止',
-        SecurityError: '安全设置阻止了麦克风',
-      };
-      const errorMessage = errorMap[err.name] || `错误: ${err.name || '未知错误'}`;
-      
-      if (['NotAllowedError', 'SecurityError'].includes(err.name)) {
-        guideToOptions('需要权限(点击授权)');
-      } else {
-        micSelect.innerHTML = `<option value="error" disabled>${errorMessage}</option>`;
-      }
+        if (stars !== undefined) {
+            const formattedStars = stars > 999 ? `${(stars / 1000).toFixed(1)}k` : stars;
+            starCountEl.textContent = formattedStars;
+            starCountEl.classList.add('loaded');
+        }
+    } catch (error) {
+        console.error('PageTalk: Could not fetch GitHub stars:', error);
     }
-  }
+}
 
-  async function loadConfig() {
-    try {
-      const result = await chrome.storage.sync.get('voiceui_config');
-      const config = { ...defaultConfig, ...(result.voiceui_config || {}) };
-
-      providerSelect.value = config.apiProvider;
-      apiKeyInput.value = config.apiKey;
-      langSelect.value = config.language;
-      micSelect.value = config.audioDeviceId;
-      itnCheckbox.checked = config.enable_itn;
-      autoCopyCheckbox.checked = config.autoCopy;
-      removePeriodCheckbox.checked = config.removeTrailingPeriod;
-      ctxInput.value = config.context;
-      clickSelect.value = String(config.clickToToggle);
-      scaleSelect.value = String(config.uiScale);
-      speedSelect.value = String(config.transcribeSpeed);
-      hotkeyInput.value = config.hotkey;
-      cancelHotkeyInput.value = config.cancelHotkey;
-
-      toggleApiKeyVisibility();
-    } catch (e) {
-      console.error("Error loading config:", e);
-      statusEl.textContent = '加载配置失败！';
-    }
-  }
-
-  function saveConfig() {
-    const configToSave = {
-      apiProvider: providerSelect.value,
-      apiKey: apiKeyInput.value.trim(),
-      language: langSelect.value,
-      audioDeviceId: micSelect.value,
-      enable_itn: itnCheckbox.checked,
-      autoCopy: autoCopyCheckbox.checked,
-      removeTrailingPeriod: removePeriodCheckbox.checked,
-      context: ctxInput.value,
-      insertMode: 'replaceSelection',
-      clickToToggle: clickSelect.value === 'true',
-      uiScale: Number(scaleSelect.value) || 1,
-      transcribeSpeed: Number(speedSelect.value) || 1,
-      hotkey: hotkeyInput.value.trim(),
-      cancelHotkey: cancelHotkeyInput.value.trim()
-    };
-
-    chrome.storage.sync.set({ voiceui_config: configToSave }, () => {
-      if (chrome.runtime.lastError) {
-        statusEl.textContent = '保存失败！';
-        statusEl.style.color = '#ef4444';
-        console.error("Error saving config:", chrome.runtime.lastError);
-      } else {
-        statusEl.textContent = '已保存！';
-        statusEl.style.color = '#22c55e';
-        setTimeout(() => {
-          statusEl.textContent = '';
-        }, 2000);
-      }
-    });
-  }
-
-  function setupHotkeyInput(inputElement) {
-    let originalHotkey = '';
-    inputElement.addEventListener('focus', (e) => {
-        originalHotkey = e.target.value;
-        e.target.value = '';
-        e.target.placeholder = '请按下快捷键组合...';
-    });
-
-    inputElement.addEventListener('blur', (e) => {
-        if (!e.target.value) {
-            e.target.value = originalHotkey;
-        }
-        e.target.placeholder = '';
-    });
-
-    inputElement.addEventListener('keydown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const parts = [];
-        if (e.ctrlKey) parts.push('Ctrl');
-        if (e.altKey) parts.push('Alt');
-        if (e.shiftKey) parts.push('Shift');
-        // metaKey is not supported by the content script hotkey checker.
-
-        const key = e.key;
-        const isModifier = ['Control', 'Alt', 'Shift', 'Meta'].includes(key);
-
-        if (isModifier) {
-            // Show currently held down modifiers for user feedback.
-            inputElement.value = parts.join('+') + (parts.length > 0 ? '+' : '');
-            return;
-        }
-
-        let displayKey;
-        switch (key) {
-            case ' ':
-                displayKey = 'Space';
-                break;
-            default:
-                if (key.length === 1 && /[a-zA-Z]/.test(key)) {
-                    displayKey = key.toUpperCase();
-                } else {
-                    displayKey = key;
-                }
-                break;
-        }
-        
-        parts.push(displayKey);
-        inputElement.value = parts.join('+');
-        saveConfig();
-    });
-  }
-  
-  loadConfig().then(() => {
-    listMicrophones();
-  });
-  
-  [providerSelect, apiKeyInput, langSelect, micSelect, itnCheckbox, autoCopyCheckbox, removePeriodCheckbox, ctxInput, clickSelect, scaleSelect, speedSelect, hotkeyInput, cancelHotkeyInput].forEach(input => {
-    input.addEventListener('change', saveConfig);
-  });
-
-  providerSelect.addEventListener('change', toggleApiKeyVisibility);
-  navigator.mediaDevices?.addEventListener?.('devicechange', listMicrophones);
-
-  setupHotkeyInput(hotkeyInput);
-  setupHotkeyInput(cancelHotkeyInput);
-
-  if (transcribeLink) {
-    transcribeLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      chrome.tabs.create({ url: 'transcribe.html' });
-      window.close();
-    });
-  }
-
-  // Modal logic
-  if (ctxExpandBtn) {
-    ctxExpandBtn.addEventListener('click', () => {
-      ctxTextarea.value = ctxInput.value;
-      ctxModal.style.display = 'flex';
-      ctxTextarea.focus();
-    });
-
-    ctxCancelBtn.addEventListener('click', () => {
-      ctxModal.style.display = 'none';
-    });
-
-    ctxSaveBtn.addEventListener('click', () => {
-      ctxInput.value = ctxTextarea.value;
-      saveConfig();
-      ctxModal.style.display = 'none';
-    });
-  }
-
-  window.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && ctxModal.style.display !== 'none') {
-          ctxModal.style.display = 'none';
-      }
-  });
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadAndApplyConfig();
+    await listMicrophones(elements);
+    initEventListeners();
+    fetchAndDisplayGitHubStars();
 });

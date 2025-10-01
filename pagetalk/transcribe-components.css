@@ -28,6 +28,19 @@
   justify-content: space-between;
 }
 .voiceui-settings-details label:not(.switch) { font-size: 13px; opacity: .9; flex-basis: 100px; flex-shrink: 0; color: var(--text-color-secondary); }
+.voiceui-settings-details .label-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    opacity: .9;
+    flex-basis: 100px;
+    flex-shrink: 0;
+    color: var(--text-color-secondary);
+}
+.voiceui-settings-details .label-container label {
+    flex-basis: auto;
+}
 .voiceui-settings-details select, .voiceui-settings-details input[type="text"], .voiceui-settings-details input[type="password"], .voiceui-settings-details input[type="number"] {
   background: var(--background-color);
   color: var(--text-color);
@@ -194,8 +207,8 @@ input:checked + .slider:before { transform: translateX(18px); }
 }
 .voiceui-link-button:hover { color: var(--primary-color-hover); }
 
-/* Context Edit Modal */
-#voiceui-ctx-modal {
+/* Context/OpenAI Edit Modal */
+#voiceui-ctx-modal, #voiceui-openai-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -277,11 +290,234 @@ input:checked + .slider:before { transform: translateX(18px); }
     font-size: 14px;
     font-weight: 500;
     box-shadow: 0 10px 30px rgba(0,0,0,.35);
-    animation: toast-fade-in-out 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: toast-fade-in-out 5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    max-width: 500px;
+    text-align: center;
+    word-break: break-word;
 }
 @keyframes toast-fade-in-out {
     0% { opacity: 0; transform: translateY(15px); }
-    10% { opacity: 1; transform: translateY(0); }
-    90% { opacity: 1; transform: translateY(0); }
+    6% { opacity: 1; transform: translateY(0); }
+    94% { opacity: 1; transform: translateY(0); }
     100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Slider for speed control */
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+.slider-wrapper input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  width: 100%;
+  height: 6px;
+  background: var(--background-color);
+  border-radius: 3px;
+  outline: none;
+  padding: 0;
+  transition: .2s;
+  cursor: pointer;
+}
+.slider-wrapper input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--text-color);
+  border-radius: 50%;
+  border: none;
+  transition: background-color .2s;
+}
+.slider-wrapper input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--text-color);
+  border-radius: 50%;
+  border: none;
+  transition: background-color .2s;
+}
+.slider-wrapper input[type="range"]:focus,
+.slider-wrapper input[type="range"]:hover {
+  background: #3f3f46;
+}
+.slider-wrapper input[type="range"]:focus::-webkit-slider-thumb,
+.slider-wrapper input[type="range"]:hover::-webkit-slider-thumb {
+    background: #fff;
+}
+.slider-wrapper input[type="range"]:focus::-moz-range-thumb,
+.slider-wrapper input[type="range"]:hover::-moz-range-thumb {
+    background: #fff;
+}
+.slider-value {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  min-width: 45px;
+  text-align: right;
+}
+
+.voiceui-input-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.voiceui-config-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color-secondary);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.voiceui-config-btn:hover {
+    background: var(--border-color);
+    color: var(--text-color);
+}
+
+.voiceui-modal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.voiceui-modal-panel .voiceui-modal-row:last-of-type {
+  margin-bottom: 0;
+}
+.voiceui-modal-row label {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  text-align: left;
+}
+
+.voiceui-modal-label-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.voiceui-modal-link {
+  font-size: 12px;
+  color: var(--text-color-secondary);
+  text-decoration: none;
+  transition: color .2s;
+}
+
+.voiceui-modal-link:hover {
+  color: var(--text-color);
+  text-decoration: underline;
+}
+
+.voiceui-modal-row input {
+  background: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.voiceui-modal-row input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.voiceui-modal-row textarea {
+  background: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.voiceui-modal-row textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.voiceui-modal-panel .voiceui-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.voiceui-modal-panel .voiceui-input-wrapper input {
+  padding-right: 32px;
+}
+.voiceui-fetch-models-btn {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 32px;
+  background: transparent;
+  border: none;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 0;
+  transition: all .2s;
+}
+.voiceui-fetch-models-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-color);
+}
+.voiceui-fetch-models-btn:disabled {
+  cursor: not-allowed;
+  background: transparent;
+  color: var(--text-color-secondary);
+}
+.voiceui-fetch-models-btn .icon-spinner {
+    animation: voiceui-spin 1s linear infinite;
+}
+@keyframes voiceui-spin { to { transform: rotate(360deg); } }
+
+
+@media (max-width: 480px) {
+  .voiceui-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .voiceui-settings-details label:not(.switch) {
+    flex-basis: auto;
+  }
+  .voiceui-row:has(.switch) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .voiceui-settings-details select, .voiceui-settings-details input[type="text"], .voiceui-settings-details input[type="password"], .voiceui-settings-details input[type="number"] {
+    width: 100%;
+  }
+  .voiceui-modal-panel {
+    padding: 16px;
+  }
+  #voiceui-ctx-textarea {
+    min-height: 150px;
+  }
+  .voiceui-modal-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 12px;
+  }
 }

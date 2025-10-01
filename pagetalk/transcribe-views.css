@@ -1,10 +1,9 @@
 /* Transcribe Area Layout & State Management */
 #transcribe-area {
   position: relative;
-  min-height: 280px;
+  height: 320px;
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
 }
 #transcribe-area > .voiceui-idle-view,
 #transcribe-area > .voiceui-loading-view,
@@ -16,7 +15,8 @@
 .voiceui-panel-main[data-state="loading"] #transcribe-area > .voiceui-loading-view,
 .voiceui-panel-main[data-state="error"] #transcribe-area > .voiceui-error-view,
 .voiceui-panel-main[data-state="preview"] #transcribe-area > .voiceui-preview-view,
-.voiceui-panel-main[data-state="result"] #transcribe-area > .voiceui-idle-view {
+.voiceui-panel-main[data-state="result"] #transcribe-area > .voiceui-preview-view,
+.voiceui-panel-main[data-state="history-result"] #transcribe-area > .voiceui-idle-view {
   display: flex;
   flex-grow: 1;
 }
@@ -38,7 +38,6 @@
 
 /* Loading & Error Views */
 .voiceui-loading-view, .voiceui-error-view {
-  min-height: 280px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -50,6 +49,15 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
+}
+.voiceui-loading-filename {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
 }
 .voiceui-loading-timer {
   font-size: 14px;

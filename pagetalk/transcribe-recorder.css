@@ -42,7 +42,6 @@
   color: white;
   border: none;
   width: auto;
-  min-width: 160px;
   height: 48px;
   border-radius: 8px;
   display: flex;
@@ -99,8 +98,27 @@
   gap: 16px;
 }
 
+.voiceui-transcribe-now-btn,
 .voiceui-cancel-btn {
   display: none;
+}
+
+.voiceui-recorder-actions:has(#record-btn.recording) .voiceui-transcribe-now-btn,
+.voiceui-recorder-actions:has(#record-btn.recording) .voiceui-cancel-btn {
+  display: flex;
+}
+
+.voiceui-transcribe-now-btn {
+  background-color: #2563eb;
+  animation: none;
+}
+
+.voiceui-transcribe-now-btn:hover {
+  background-color: var(--primary-color-hover);
+  animation: none;
+}
+
+.voiceui-cancel-btn {
   background-color: #52525b;
   min-width: auto;
   padding: 0 24px;
@@ -113,6 +131,18 @@
   animation: none;
 }
 
-.voiceui-recorder-btn.recording + .voiceui-cancel-btn {
-  display: flex;
+@media (max-width: 480px) {
+  .voiceui-recorder-actions {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .voiceui-recorder-btn {
+    width: 100%;
+    min-width: 0;
+  }
+  .voiceui-recorder-viz {
+    height: 100px;
+  }
 }

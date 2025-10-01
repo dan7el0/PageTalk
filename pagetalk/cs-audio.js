@@ -3,7 +3,6 @@
 let audioContext, mediaStream, sourceNode, workletNode;
 let pcmData = [];
 let currentSampleRate = 44100;
-let isRecording = false;
 
 const MAX_RECORDING_SECONDS = 180; // 3 minutes
 let recordingTimerInterval = null;
@@ -31,10 +30,9 @@ async function startRecording() {
     lastFocusedEl = getActiveEditable();
 
     const audioConstraints = {
-      sampleRate: 16000,
-      echoCancellation: false,
+      echoCancellation: true,
       noiseSuppression: true,
-      autoGainControl: false,
+      autoGainControl: true,
       channelCount: 1
     };
 
@@ -82,6 +80,11 @@ async function startRecording() {
 
     sourceNode.connect(workletNode);
     workletNode.connect(audioContext.destination);
+
+    // When recording starts, undock the UI to make it fully visible.
+    if (typeof undockUI === 'function') {
+      undockUI();
+    }
 
     isRecording = true;
     ui.wrap.classList.add('recording');
@@ -162,6 +165,7 @@ function getLanguageAbbreviation(lang) {
     'spanish': 'es',
     // Free API values (as is)
     '中文': 'zh',
+    '英文': 'en',
     '英语': 'en',
     '日语': 'ja',
     '韩语': 'ko',
@@ -251,44 +255,104 @@ async function stopRecording() {
   pcmData = [];
   setButtonLevel(0);
   
-  try {
-    ui.badge.textContent = '…';
-    ui.badge.style.background = '#f97316';
-    toast('正在识别…');
-    let text, lang;
-    if (state.apiProvider === 'free') {
-        [text, lang] = await callFreeASRAPI(wavBlob, state);
-    } else {
-        [text, lang] = await callDashScopeASRAPI(wavBlob, state);
+  ui.badge.textContent = '…';
+  ui.badge.style.background = '#f97316';
+  toast('正在识别…');
+
+  const handleSuccess = async (text, lang) => {
+    let processedText = text;
+
+    if (state.enableConsoleControl && processedText) {
+      const commandSent = await processConsoleCommand(processedText);
+      if (commandSent) {
+          return; // Stop further processing if command was successful
+      }
+      // If command failed, fall through to normal text insertion.
     }
 
-    if (state.removeTrailingPeriod && text && text.endsWith('。')) {
-      text = text.slice(0, -1);
+    if (state.enableOpenaiProcessing && processedText) {
+        try {
+            toast('正在后处理文本…');
+            processedText = await callOpenAIAPI(processedText, state);
+        } catch (err) {
+            console.error('OpenAI API error:', err);
+            toast('文本后处理失败: ' + (err?.message || err));
+            // Continue with original text on failure
+        }
+    }
+    
+    if (state.removeTrailingPeriod && processedText && processedText.endsWith('。')) {
+      processedText = processedText.slice(0, -1);
     }
     
     const langAbbr = getLanguageAbbreviation(lang);
     ui.badge.textContent = langAbbr || 'OK';
     ui.badge.style.background = '#22c55e';
 
-    let toastMessage = '识别完成' + (langAbbr ? `（${langAbbr}）` : '');
-    if (state.autoCopy && text) {
+    let copyStatus = '';
+    if (state.autoCopy && processedText) {
       try {
-        await navigator.clipboard.writeText(text);
-        toastMessage = '识别完成并已复制';
+        await navigator.clipboard.writeText(processedText);
+        copyStatus = '并已复制';
       } catch (err) {
         console.error("Auto-copy failed", err);
-        toastMessage = '识别完成（复制失败）';
+        copyStatus = '（复制失败）';
       }
     }
 
-    insertTextAtCursor(text);
+    insertTextAtCursor(processedText);
+    
+    const toastMessage = `识别完成${copyStatus}。\n${processedText}`;
     toast(toastMessage);
 
-  } catch (err) {
+    if (processedText) {
+      const historyItem = {
+        text: processedText,
+        lang: langAbbr,
+        filename: '悬浮按钮录音',
+        timestamp: Date.now(),
+      };
+      chrome.runtime.sendMessage({ type: 'saveToHistory', payload: historyItem });
+    }
+  };
+
+  const handleError = (err) => {
     console.error('ASR error:', err);
     ui.badge.textContent = '!';
     ui.badge.style.background = '#ef4444';
     toast('识别失败：' + (err && err.message ? err.message : err));
+  };
+
+  try {
+    if (state.apiProvider === 'dashscope' && state.enableStreaming) {
+      ui.streamingText.style.display = 'block';
+      ui.streamingText.textContent = '';
+      await callDashScopeASRAPIStream(wavBlob, state, {
+        onChunk: (currentText) => {
+          ui.streamingText.textContent = currentText;
+        },
+        onFinish: (finalText, lang) => {
+          ui.streamingText.style.display = 'none';
+          ui.streamingText.textContent = '';
+          handleSuccess(finalText, lang);
+        },
+        onError: (err) => {
+          ui.streamingText.style.display = 'none';
+          ui.streamingText.textContent = '';
+          handleError(err);
+        },
+      });
+    } else {
+      let text, lang;
+      if (state.apiProvider === 'free') {
+          [text, lang] = await callFreeASRAPI(wavBlob, state);
+      } else {
+          [text, lang] = await callDashScopeASRAPI(wavBlob, state);
+      }
+      handleSuccess(text, lang);
+    }
+  } catch (err) {
+    handleError(err);
   }
 }
 

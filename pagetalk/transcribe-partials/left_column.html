@@ -16,8 +16,11 @@
             </div>
           </span>
           <span class="recording-content">
-            <span class="btn-text-main">停止录音</span>
+            <span class="btn-text-main">停止</span>
           </span>
+        </button>
+        <button class="voiceui-recorder-btn voiceui-transcribe-now-btn" id="transcribe-now-btn" title="完成并立即开始识别">
+          <span class="btn-text-main">识别</span>
         </button>
         <button class="voiceui-recorder-btn voiceui-cancel-btn" id="cancel-record-btn" title="取消录音">
           <span class="btn-text-main">取消</span>
@@ -41,6 +44,7 @@
   <div class="voiceui-loading-view">
     <div class="voiceui-spinner"></div>
     <div class="voiceui-loading-text-group">
+      <span class="voiceui-loading-filename"></span>
       <span>正在识别...</span>
       <span class="voiceui-loading-timer">0.0s</span>
     </div>
@@ -104,6 +108,10 @@
       </div>
     </div>
     <div class="voiceui-preview-actions">
+      <button class="voiceui-panel-action-btn secondary" id="preview-start-new-recording-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+        <span>开始录音</span>
+      </button>
       <button class="voiceui-panel-action-btn primary" id="preview-transcribe-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h18M13 5l7 7-7 7"/></svg>
         <span>开始转录</span>
@@ -125,6 +133,13 @@
         <option value="dashscope">阿里云百炼</option>
     </select></div>
     <div class="voiceui-row" id="api-key-row"><label for="voiceui-apikey">阿里云百炼 Key</label><input type="password" id="voiceui-apikey" placeholder="sk-..." /></div>
+    <div class="voiceui-row" id="dashscope-model-row">
+      <label for="voiceui-dashscope-model">ASR 模型</label>
+      <select id="voiceui-dashscope-model">
+        <option value="qwen3-asr-flash">qwen3-asr-flash</option>
+        <option value="qwen3-asr-flash-2025-09-08">qwen3-asr-flash-2025-09-08</option>
+      </select>
+    </div>
     <div class="voiceui-row"><label for="voiceui-lang">语言</label><select id="voiceui-lang">
         <option value="auto">🌐 自动检测</option>
         <option value="zh">🇨🇳 中文</option>
@@ -143,6 +158,7 @@
         <option value="default">默认设备</option>
     </select></div>
     <div class="voiceui-row"><label for="voiceui-itn" title="启用后，会将语音识别结果中的数字、日期、度量单位等格式化为书面语，例如将“一百块”转换为“100元”。">逆向文本标准化</label><label class="switch"><input type="checkbox" id="voiceui-itn" /><span class="slider"></span></label></div>
+    <div class="voiceui-row" id="voiceui-streaming-row"><label for="voiceui-streaming" title="启用后，将实时返回识别的中间结果，减少等待时间。仅阿里云百炼服务可用。">流式输出</label><label class="switch"><input type="checkbox" id="voiceui-streaming" /><span class="slider"></span></label></div>
     <div class="voiceui-row">
       <label for="voiceui-ctx">上下文</label>
       <div class="voiceui-input-wrapper">
@@ -159,8 +175,35 @@
     <div class="voiceui-row"><label for="voiceui-autocopy" title="启用后，识别成功的文本会自动复制到剪贴板。">自动复制</label><label class="switch"><input type="checkbox" id="voiceui-autocopy" /><span class="slider"></span></label></div>
     <div class="voiceui-row"><label for="voiceui-remove-period" title="启用后，会自动移除中文模式下句末的句号“。”。">去掉句末句号</label><label class="switch"><input type="checkbox" id="voiceui-remove-period" /><span class="slider"></span></label></div>
     <div class="voiceui-row">
-      <label for="voiceui-speed" title="启用后，会在转录前对音频进行加速处理，可以节省长音频的转录时间，但可能会略微影响准确率。有效范围: 0.5-4.0">转录倍速</label>
-      <input type="number" id="voiceui-speed" min="0.5" max="4" step="0.05" />
+      <div class="label-container">
+        <label for="voiceui-openai-processing" title="启用后，会将识别后的文本发送给一个兼容OpenAI API的大语言模型进行处理。">文本后处理</label>
+      </div>
+      <div class="voiceui-input-container">
+        <button type="button" id="voiceui-openai-config-btn" class="voiceui-config-btn">配置</button>
+        <label class="switch"><input type="checkbox" id="voiceui-openai-processing" /><span class="slider"></span></label>
+      </div>
+    </div>
+    <div class="voiceui-row">
+      <div class="label-container">
+        <label for="voiceui-console-control" title="启用后，会将识别后的文本发送给一个大语言模型以生成浏览器控制台命令并执行。">控制台命令</label>
+      </div>
+      <div class="voiceui-input-container">
+        <button type="button" id="voiceui-console-config-btn" class="voiceui-config-btn">配置</button>
+        <label class="switch"><input type="checkbox" id="voiceui-console-control" /><span class="slider"></span></label>
+      </div>
+    </div>
+    <div class="voiceui-row">
+      <div class="label-container">
+        <label for="voiceui-speed">转录倍速</label>
+        <div class="voiceui-tooltip-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" class="voiceui-help-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <div class="voiceui-tooltip-content">启用后，会在转录前对音频进行加速处理，可以节省长音频的转录时间，但可能会略微影响准确率。</div>
+        </div>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" id="voiceui-speed" min="0.5" max="3" step="0.05" value="1">
+        <span id="voiceui-speed-value" class="slider-value">1.00x</span>
+      </div>
     </div>
   </div>
 </details>

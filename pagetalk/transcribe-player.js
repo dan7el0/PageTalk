@@ -104,10 +104,30 @@ export function updatePreviewAudioForSpeedChange() {
     updatePreviewAudio();
 }
 
-export function setupPreview(file) {
+export function setupPreview(file, changeState = true) {
+  if (!file) {
+    if (hiddenAudioPlayer.src) {
+      URL.revokeObjectURL(hiddenAudioPlayer.src);
+    }
+    hiddenAudioPlayer.removeAttribute('src');
+    hiddenAudioPlayer.load();
+    hiddenAudioPlayer.pause();
+    originalAudioBlob = null;
+    previewAudioBlob = null;
+    uiElements.playerFilename.textContent = '';
+    uiElements.playerTimedisplay.textContent = '00:00 / 00:00';
+    uiElements.playhead.style.left = '0%';
+    const { previewCanvas, previewCanvasCtx } = uiElements;
+    if (previewCanvasCtx) {
+      previewCanvasCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    }
+    return;
+  }
   originalAudioBlob = file;
   previewAudioBlob = file;
-  setUIState('preview');
+  if (changeState) {
+    setUIState('preview');
+  }
   updatePreviewAudio();
 }
 

@@ -9,3 +9,60 @@
     </div>
   </div>
 </div>
+<div id="voiceui-openai-modal" class="voiceui-modal-overlay">
+  <div class="voiceui-modal-panel">
+    <h3>文本后处理配置</h3>
+    <p class="voiceui-modal-desc">配置一个兼容 OpenAI API 的模型来处理 ASR 识别后的文本。</p>
+    <div class="voiceui-modal-row"><label for="voiceui-openai-baseurl">Base URL</label><input type="text" id="voiceui-openai-baseurl" placeholder="https://api.example.com/v1" /></div>
+    <div class="voiceui-modal-row">
+      <div class="voiceui-modal-label-container">
+        <label for="voiceui-openai-apikey">API Key</label>
+        <a href="https://cloud.cerebras.ai/" target="_blank" rel="noopener noreferrer" class="voiceui-modal-link">获取 API Key</a>
+      </div>
+      <input type="password" id="voiceui-openai-apikey" placeholder="sk-..." />
+    </div>
+    <div class="voiceui-modal-row">
+      <label for="voiceui-openai-modelid">Model ID</label>
+      <div class="voiceui-input-wrapper">
+        <input type="text" id="voiceui-openai-modelid" placeholder="gpt-oss-120b" list="voiceui-openai-models-list"/>
+        <button type="button" id="voiceui-fetch-models-btn" class="voiceui-fetch-models-btn" title="Fetch available models">
+          <svg class="icon-fetch" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          <svg class="icon-spinner" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        </button>
+      </div>
+      <datalist id="voiceui-openai-models-list"></datalist>
+    </div>
+    <div class="voiceui-modal-row"><label for="voiceui-openai-systemprompt">系统提示词</label><textarea id="voiceui-openai-systemprompt" rows="4" placeholder="例如：你是一个专业的速记员..."></textarea></div>
+    <div class="voiceui-modal-actions">
+      <button id="voiceui-openai-cancel" type="button" class="voiceui-modal-btn">取消</button>
+      <button id="voiceui-openai-save" type="button" class="voiceui-modal-btn primary">保存</button>
+    </div>
+  </div>
+</div>
+<div id="voiceui-console-modal" class="voiceui-modal-overlay">
+  <div class="voiceui-modal-panel">
+    <h3>控制台命令配置</h3>
+    <p class="voiceui-modal-desc">配置一个兼容 OpenAI API 的模型来生成并执行浏览器控制台命令。</p>
+    <div class="voiceui-modal-row"><label for="voiceui-console-baseurl">Base URL</label><input type="text" id="voiceui-console-baseurl" placeholder="https://api.example.com/v1" /></div>
+    <div class="voiceui-modal-row">
+      <label for="voiceui-console-apikey">API Key</label>
+      <input type="password" id="voiceui-console-apikey" placeholder="sk-..." />
+    </div>
+    <div class="voiceui-modal-row">
+      <label for="voiceui-console-modelid">Model ID</label>
+      <div class="voiceui-input-wrapper">
+        <input type="text" id="voiceui-console-modelid" placeholder="gpt-oss-120b" list="voiceui-console-models-list"/>
+        <button type="button" id="voiceui-fetch-console-models-btn" class="voiceui-fetch-models-btn" title="Fetch available models">
+          <svg class="icon-fetch" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          <svg class="icon-spinner" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        </button>
+      </div>
+      <datalist id="voiceui-console-models-list"></datalist>
+    </div>
+    <div class="voiceui-modal-row"><label for="voiceui-console-systemprompt">系统提示词</label><textarea id="voiceui-console-systemprompt" rows="4" placeholder="例如：你是一个浏览器助手..."></textarea></div>
+    <div class="voiceui-modal-actions">
+      <button id="voiceui-console-cancel" type="button" class="voiceui-modal-btn">取消</button>
+      <button id="voiceui-console-save" type="button" class="voiceui-modal-btn primary">保存</button>
+    </div>
+  </div>
+</div>

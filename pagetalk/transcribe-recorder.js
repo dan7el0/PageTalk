@@ -6,6 +6,7 @@ let isRecording = false;
 let mediaRecorder, audioChunks, audioContext, source, analyser, dataArray, animationFrameId, timerInterval, recordingTimeoutId;
 let idleAnimationTime = 0;
 let idleAnimationFrameId;
+let onRecordingCompleteCallback, onTranscribeNowCallback;
 
 const MAX_RECORDING_DURATION_SECONDS = 180; // 3 minutes
 
@@ -93,15 +94,15 @@ const drawWaveform = () => {
   recorderCanvasCtx.stroke();
 };
 
-async function startRecording(onRecordingComplete) {
+async function startRecording() {
   if (isRecording) return;
   stopIdleAnimation();
   try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
           audio: {
-              echoCancellation: false,
-              noiseSuppression: false,
-              autoGainControl: false,
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
               ...(currentConfig.audioDeviceId !== 'default' && { deviceId: { exact: currentConfig.audioDeviceId } })
           }
       });
@@ -116,7 +117,7 @@ async function startRecording(onRecordingComplete) {
       analyser = audioContext.createAnalyser();
       analyser.fftSize = 2048;
       source.connect(analyser);
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      dataArray = new Uint8Array(analyser.fftSize);
       drawWaveform();
 
       let startTime = Date.now();
@@ -126,23 +127,11 @@ async function startRecording(onRecordingComplete) {
       }, 1000);
 
       mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      mediaRecorder.onstop = () => {
-          cleanupAudio();
-          if (audioChunks.length === 0) {
-            toast('录音时间太短');
-            setUIState('idle');
-            return;
-          }
-          
-          const audioBlob = new Blob(audioChunks, { type: audioChunks[0].type });
-          const audioFile = new File([audioBlob], `recording-${getFormattedTimestamp()}.webm`, { type: audioBlob.type });
-          onRecordingComplete(audioFile);
-      };
-
+      
       recordingTimeoutId = setTimeout(() => {
           if (isRecording) {
               toast('已达到3分钟录音上限，自动停止。');
-              stopRecording();
+              stopRecordingAndProcess(onRecordingCompleteCallback);
           }
       }, MAX_RECORDING_DURATION_SECONDS * 1000);
       
@@ -150,21 +139,54 @@ async function startRecording(onRecordingComplete) {
       toast('录音开始，最长3分钟。');
   } catch (err) {
       console.error("Error starting recording:", err);
-      toast(err.name === 'NotFoundError' ? '选择的麦克风未找到，请检查设备或重新选择。' : `无法开始录音: ${err.message}`);
-      if (err.name === 'NotFoundError') listMicrophones();
+      let message;
+      if (err instanceof DOMException) {
+        switch (err.name) {
+          case 'NotAllowedError':
+            message = '您已阻止麦克风权限，请在浏览器设置中允许访问。';
+            break;
+          case 'NotFoundError':
+            message = '选择的麦克风未找到，请检查设备或重新选择。';
+            listMicrophones();
+            break;
+          case 'NotReadableError':
+            message = '麦克风硬件错误，无法读取。';
+            break;
+          default:
+            message = `无法开始录音: ${err.name}`;
+        }
+      } else if (err && err.message) {
+        message = '无法开始录音: ' + err.message;
+      } else {
+        message = '无法开始录音，发生未知错误。';
+      }
+      toast(message);
       setUIState('idle');
   }
 }
 
-function stopRecording() {
+function stopRecordingAndProcess(callback) {
   if (!isRecording) return;
+
+  mediaRecorder.onstop = () => {
+    cleanupAudio();
+    if (audioChunks.length === 0) {
+      toast('录音时间太短');
+      setUIState('idle');
+      return;
+    }
+    const audioBlob = new Blob(audioChunks, { type: audioChunks[0].type });
+    const audioFile = new File([audioBlob], `recording-${getFormattedTimestamp()}.webm`, { type: audioBlob.type });
+    callback(audioFile);
+  };
+
   isRecording = false;
   if (recordingTimeoutId) {
-      clearTimeout(recordingTimeoutId);
-      recordingTimeoutId = null;
+    clearTimeout(recordingTimeoutId);
+    recordingTimeoutId = null;
   }
   if (mediaRecorder?.state === 'recording') {
-      mediaRecorder.stop();
+    mediaRecorder.stop();
   }
 }
 
@@ -182,15 +204,24 @@ function cancelRecording() {
   setUIState('idle');
 }
 
-export function initRecorder(onRecordingComplete) {
+export function initRecorder(onRecordingComplete, onTranscribeNow) {
+  onRecordingCompleteCallback = onRecordingComplete;
+  onTranscribeNowCallback = onTranscribeNow;
+
   uiElements.recordBtn.addEventListener('click', () => {
     if (isRecording) {
-      stopRecording();
+      stopRecordingAndProcess(onRecordingCompleteCallback);
     } else {
-      startRecording(onRecordingComplete);
+      startRecording();
     }
   });
   
+  uiElements.transcribeNowBtn.addEventListener('click', () => {
+    if (isRecording) {
+      stopRecordingAndProcess(onTranscribeNowCallback);
+    }
+  });
+
   uiElements.cancelRecordBtn.addEventListener('click', cancelRecording);
   
   drawIdleLine();

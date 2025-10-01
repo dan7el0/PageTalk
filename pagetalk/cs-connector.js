@@ -13,7 +13,7 @@ function connectToServiceWorker() {
     const keepAlive = () => {
       try {
         port.postMessage({ type: 'heartbeat' });
-        setTimeout(keepAlive, 25000);
+        setTimeout(keepAlive, 15000);
       } catch (e) {
         // The port closing is an expected state.
         // The onDisconnect listener will automatically handle reconnection.
